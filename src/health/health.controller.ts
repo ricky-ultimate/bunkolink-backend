@@ -1,4 +1,9 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
-@Controller('health')
-export class HealthController {}
+@Controller('v1/health')
+export class HealthController {
+  @Get()
+  getHealth() {
+    return { status: 'Healthy', uptime: process.uptime() };
+  }
+}
