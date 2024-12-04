@@ -15,12 +15,10 @@ describe('BorrowedBooksController', () => {
           useValue: {
             borrowBook: jest.fn().mockResolvedValue({ success: true }),
             returnBook: jest.fn().mockResolvedValue({ success: true }),
-            getAllBorrowedBooks: jest
-              .fn()
-              .mockResolvedValue([
-                { id: 1, bookId: 1, studentId: 1, returnDate: null },
-                { id: 2, bookId: 2, studentId: 2, returnDate: null },
-              ]),
+            getAllBorrowedBooks: jest.fn().mockResolvedValue([
+              { id: 1, bookId: 1, studentId: 1, returnDate: null },
+              { id: 2, bookId: 2, studentId: 2, returnDate: null },
+            ]),
           },
         },
       ],

@@ -20,13 +20,15 @@ describe('StudentsService', () => {
   });
 
   it('should create a student', async () => {
-    const createStudentSpy = jest.spyOn(prisma.student, 'create').mockResolvedValue({
-      id: 1,
-      name: 'John Doe',
-      matricNumber: 'MT20231001',
-      level: '300',
-      department: 'Computer Science',
-    });
+    const createStudentSpy = jest
+      .spyOn(prisma.student, 'create')
+      .mockResolvedValue({
+        id: 1,
+        name: 'John Doe',
+        matricNumber: 'MT20231001',
+        level: '300',
+        department: 'Computer Science',
+      });
 
     const result = await service.createStudent({
       name: 'John Doe',
@@ -40,13 +42,15 @@ describe('StudentsService', () => {
   });
 
   it('should update a student', async () => {
-    const updateStudentSpy = jest.spyOn(prisma.student, 'update').mockResolvedValue({
-      id: 1,
-      name: 'John Doe',
-      matricNumber: 'MT20231001',
-      level: '400',  // Changed level for the update
-      department: 'Computer Science',
-    });
+    const updateStudentSpy = jest
+      .spyOn(prisma.student, 'update')
+      .mockResolvedValue({
+        id: 1,
+        name: 'John Doe',
+        matricNumber: 'MT20231001',
+        level: '400', // Changed level for the update
+        department: 'Computer Science',
+      });
 
     const result = await service.updateStudent(1, {
       level: '400',
@@ -57,13 +61,15 @@ describe('StudentsService', () => {
   });
 
   it('should find a student by ID', async () => {
-    const findStudentSpy = jest.spyOn(prisma.student, 'findUnique').mockResolvedValue({
-      id: 1,
-      name: 'John Doe',
-      matricNumber: 'MT20231001',
-      level: '300',
-      department: 'Computer Science',
-    });
+    const findStudentSpy = jest
+      .spyOn(prisma.student, 'findUnique')
+      .mockResolvedValue({
+        id: 1,
+        name: 'John Doe',
+        matricNumber: 'MT20231001',
+        level: '300',
+        department: 'Computer Science',
+      });
 
     const result = await service.getStudentById(1);
 
@@ -73,13 +79,15 @@ describe('StudentsService', () => {
   });
 
   it('should delete a student', async () => {
-    const deleteStudentSpy = jest.spyOn(prisma.student, 'delete').mockResolvedValue({
-      id: 1,
-      name: 'John Doe',
-      matricNumber: 'MT20231001',
-      level: '300',
-      department: 'Computer Science',
-    });
+    const deleteStudentSpy = jest
+      .spyOn(prisma.student, 'delete')
+      .mockResolvedValue({
+        id: 1,
+        name: 'John Doe',
+        matricNumber: 'MT20231001',
+        level: '300',
+        department: 'Computer Science',
+      });
 
     const result = await service.deleteStudent(1);
 
@@ -88,10 +96,12 @@ describe('StudentsService', () => {
     expect(result.id).toEqual(1);
 
     // Check if student is actually deleted
-  const findStudentSpy = jest.spyOn(prisma.student, 'findUnique').mockResolvedValue(null);
+    const findStudentSpy = jest
+      .spyOn(prisma.student, 'findUnique')
+      .mockResolvedValue(null);
 
-  const deletedStudent = await service.getStudentById(1);
-  expect(findStudentSpy).toHaveBeenCalledTimes(1);
-  expect(deletedStudent).toBeNull();  // Ensure that student no longer exists
+    const deletedStudent = await service.getStudentById(1);
+    expect(findStudentSpy).toHaveBeenCalledTimes(1);
+    expect(deletedStudent).toBeNull(); // Ensure that student no longer exists
   });
 });

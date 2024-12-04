@@ -38,16 +38,21 @@ describe('BooksService', () => {
       availableCopies: 10,
     });
 
-    const result = await service.updateBook(1, { title: 'Updated NestJS Guide', availableCopies: 10 });
+    const result = await service.updateBook(1, {
+      title: 'Updated NestJS Guide',
+      availableCopies: 10,
+    });
     expect(updateBookSpy).toHaveBeenCalledTimes(1);
     expect(result.title).toEqual('Updated NestJS Guide');
   });
 
   it('should fetch all books', async () => {
-    const getAllBooksSpy = jest.spyOn(prisma.book, 'findMany').mockResolvedValue([
-      { id: 1, title: 'NestJS Guide', availableCopies: 5 },
-      { id: 2, title: 'React Basics', availableCopies: 3 },
-    ]);
+    const getAllBooksSpy = jest
+      .spyOn(prisma.book, 'findMany')
+      .mockResolvedValue([
+        { id: 1, title: 'NestJS Guide', availableCopies: 5 },
+        { id: 2, title: 'React Basics', availableCopies: 3 },
+      ]);
 
     const result = await service.getAllBooks();
     expect(getAllBooksSpy).toHaveBeenCalledTimes(1);
@@ -57,11 +62,13 @@ describe('BooksService', () => {
   });
 
   it('should fetch a book by ID', async () => {
-    const getBookByIdSpy = jest.spyOn(prisma.book, 'findUnique').mockResolvedValue({
-      id: 1,
-      title: 'NestJS Guide',
-      availableCopies: 5,
-    });
+    const getBookByIdSpy = jest
+      .spyOn(prisma.book, 'findUnique')
+      .mockResolvedValue({
+        id: 1,
+        title: 'NestJS Guide',
+        availableCopies: 5,
+      });
 
     const result = await service.getBookById(1);
     expect(getBookByIdSpy).toHaveBeenCalledTimes(1);
@@ -69,7 +76,9 @@ describe('BooksService', () => {
   });
 
   it('should return null when book is not found by ID', async () => {
-    const getBookByIdSpy = jest.spyOn(prisma.book, 'findUnique').mockResolvedValue(null);
+    const getBookByIdSpy = jest
+      .spyOn(prisma.book, 'findUnique')
+      .mockResolvedValue(null);
 
     const result = await service.getBookById(999); // Non-existing ID
     expect(getBookByIdSpy).toHaveBeenCalledTimes(1);
@@ -90,7 +99,9 @@ describe('BooksService', () => {
   });
 
   it('should return null when deleting a non-existing book', async () => {
-    const deleteBookSpy = jest.spyOn(prisma.book, 'delete').mockResolvedValue(null);
+    const deleteBookSpy = jest
+      .spyOn(prisma.book, 'delete')
+      .mockResolvedValue(null);
 
     const result = await service.deleteBook(999); // Non-existing ID
     expect(deleteBookSpy).toHaveBeenCalledTimes(1);

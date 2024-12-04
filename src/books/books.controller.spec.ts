@@ -13,10 +13,32 @@ describe('BooksController', () => {
         {
           provide: BooksService,
           useValue: {
-            createBook: jest.fn().mockResolvedValue({ id: 1, title: 'NestJS Guide', availableCopies: 5 }),
-            getAllBooks: jest.fn().mockResolvedValue([{ id: 1, title: 'NestJS Guide', availableCopies: 5 }]),
-            getBookById: jest.fn().mockResolvedValue({ id: 1, title: 'NestJS Guide', availableCopies: 5 }),
-            updateBook: jest.fn().mockResolvedValue({ id: 1, title: 'Updated NestJS Guide', availableCopies: 10 }),
+            createBook: jest
+              .fn()
+              .mockResolvedValue({
+                id: 1,
+                title: 'NestJS Guide',
+                availableCopies: 5,
+              }),
+            getAllBooks: jest
+              .fn()
+              .mockResolvedValue([
+                { id: 1, title: 'NestJS Guide', availableCopies: 5 },
+              ]),
+            getBookById: jest
+              .fn()
+              .mockResolvedValue({
+                id: 1,
+                title: 'NestJS Guide',
+                availableCopies: 5,
+              }),
+            updateBook: jest
+              .fn()
+              .mockResolvedValue({
+                id: 1,
+                title: 'Updated NestJS Guide',
+                availableCopies: 10,
+              }),
             deleteBook: jest.fn().mockResolvedValue({ id: 1 }),
           },
         },
@@ -32,7 +54,10 @@ describe('BooksController', () => {
   });
 
   it('should create a book', async () => {
-    const result = await controller.createBook({ title: 'NestJS Guide', availableCopies: 5 });
+    const result = await controller.createBook({
+      title: 'NestJS Guide',
+      availableCopies: 5,
+    });
     expect(result.title).toEqual('NestJS Guide');
     expect(result.availableCopies).toEqual(5);
   });
@@ -50,7 +75,10 @@ describe('BooksController', () => {
   });
 
   it('should update a book', async () => {
-    const result = await controller.updateBook('1', { title: 'Updated NestJS Guide', availableCopies: 10 });
+    const result = await controller.updateBook('1', {
+      title: 'Updated NestJS Guide',
+      availableCopies: 10,
+    });
     expect(result.title).toEqual('Updated NestJS Guide');
     expect(result.availableCopies).toEqual(10);
   });
