@@ -23,7 +23,7 @@ model Book {
 model Student {
     id            Int            @id @default(autoincrement())
     name          String
-    metricNumber  String         @unique
+    matricNumber  String         @unique
     level         String
     department    String
     borrowedBooks BorrowedBook[]

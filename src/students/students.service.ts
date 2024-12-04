@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class StudentsService {
   constructor(private prisma: PrismaService) {}
 
-  async createStudent(data: { name: string; metricNumber: string; level: string; department: string }) {
+  async createStudent(data: { name: string; matricNumber: string; level: string; department: string }) {
     return this.prisma.student.create({
       data,
     });
@@ -21,7 +21,7 @@ export class StudentsService {
     });
   }
 
-  async updateStudent(id: number, data: Partial<{ name: string; metricNumber: string; level: string; department: string }>) {
+  async updateStudent(id: number, data: Partial<{ name: string; matricNumber: string; level: string; department: string }>) {
     return this.prisma.student.update({
       where: { id },
       data,
