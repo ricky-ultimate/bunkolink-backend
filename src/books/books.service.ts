@@ -19,7 +19,10 @@ export class BooksService {
     return this.prisma.book.findUnique({ where: { id } });
   }
 
-  async updateBook(id: number, data: Partial<{ title: string; availableCopies: number }>) {
+  async updateBook(
+    id: number,
+    data: Partial<{ title: string; availableCopies: number }>,
+  ) {
     return this.prisma.book.update({
       where: { id },
       data,
