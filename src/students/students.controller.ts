@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { StudentsService } from './students.service';
 
 @Controller('v1/students')
@@ -6,7 +14,15 @@ export class StudentsController {
   constructor(private studentsService: StudentsService) {}
 
   @Post()
-  async createStudent(@Body() body: { name: string; matricNumber: string; level: string; department: string }) {
+  async createStudent(
+    @Body()
+    body: {
+      name: string;
+      matricNumber: string;
+      level: string;
+      department: string;
+    },
+  ) {
     return this.studentsService.createStudent(body);
   }
 
@@ -21,7 +37,16 @@ export class StudentsController {
   }
 
   @Patch(':id')
-  async updateStudent(@Param('id') id: string, @Body() body: Partial<{ name: string; matricNumber: string; level: string; department: string }>) {
+  async updateStudent(
+    @Param('id') id: string,
+    @Body()
+    body: Partial<{
+      name: string;
+      matricNumber: string;
+      level: string;
+      department: string;
+    }>,
+  ) {
     return this.studentsService.updateStudent(+id, body);
   }
 
