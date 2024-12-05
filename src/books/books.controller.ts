@@ -14,8 +14,21 @@ export class BooksController {
   constructor(private booksService: BooksService) {}
 
   @Post()
-  async createBook(@Body() body: { title: string; availableCopies: number }) {
-    return this.booksService.createBook(body.title, body.availableCopies);
+  async createBook(
+    @Body()
+    body: {
+      title: string;
+      author: string;
+      ISBN: string;
+      availableCopies: number;
+    },
+  ) {
+    return this.booksService.createBook(
+      body.title,
+      body.author,
+      body.ISBN,
+      body.availableCopies,
+    );
   }
 
   @Get()
@@ -31,7 +44,13 @@ export class BooksController {
   @Patch(':id')
   async updateBook(
     @Param('id') id: string,
-    @Body() body: { title?: string; availableCopies?: number },
+    @Body()
+    body: Partial<{
+      title: string;
+      author: string;
+      ISBN: string;
+      availableCopies: number;
+    }>,
   ) {
     return this.booksService.updateBook(+id, body);
   }

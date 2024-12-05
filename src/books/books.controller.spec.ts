@@ -13,32 +13,36 @@ describe('BooksController', () => {
         {
           provide: BooksService,
           useValue: {
-            createBook: jest
-              .fn()
-              .mockResolvedValue({
+            createBook: jest.fn().mockResolvedValue({
+              id: 1,
+              title: 'NestJS Guide',
+              author: 'John Doe',
+              ISBN: '123456789',
+              availableCopies: 5,
+            }),
+            getAllBooks: jest.fn().mockResolvedValue([
+              {
                 id: 1,
                 title: 'NestJS Guide',
+                author: 'John Doe',
+                ISBN: '123456789',
                 availableCopies: 5,
-              }),
-            getAllBooks: jest
-              .fn()
-              .mockResolvedValue([
-                { id: 1, title: 'NestJS Guide', availableCopies: 5 },
-              ]),
-            getBookById: jest
-              .fn()
-              .mockResolvedValue({
-                id: 1,
-                title: 'NestJS Guide',
-                availableCopies: 5,
-              }),
-            updateBook: jest
-              .fn()
-              .mockResolvedValue({
-                id: 1,
-                title: 'Updated NestJS Guide',
-                availableCopies: 10,
-              }),
+              },
+            ]),
+            getBookById: jest.fn().mockResolvedValue({
+              id: 1,
+              title: 'NestJS Guide',
+              author: 'John Doe',
+              ISBN: '123456789',
+              availableCopies: 5,
+            }),
+            updateBook: jest.fn().mockResolvedValue({
+              id: 1,
+              title: 'Updated NestJS Guide',
+              author: 'Jane Doe',
+              ISBN: '987654321',
+              availableCopies: 10,
+            }),
             deleteBook: jest.fn().mockResolvedValue({ id: 1 }),
           },
         },
@@ -56,9 +60,13 @@ describe('BooksController', () => {
   it('should create a book', async () => {
     const result = await controller.createBook({
       title: 'NestJS Guide',
+      author: 'John Doe',
+      ISBN: '123456789',
       availableCopies: 5,
     });
     expect(result.title).toEqual('NestJS Guide');
+    expect(result.author).toEqual('John Doe');
+    expect(result.ISBN).toEqual('123456789');
     expect(result.availableCopies).toEqual(5);
   });
 
@@ -66,20 +74,28 @@ describe('BooksController', () => {
     const result = await controller.getAllBooks();
     expect(result).toHaveLength(1);
     expect(result[0].title).toEqual('NestJS Guide');
+    expect(result[0].author).toEqual('John Doe');
+    expect(result[0].ISBN).toEqual('123456789');
   });
 
   it('should fetch a book by ID', async () => {
     const result = await controller.getBookById('1');
     expect(result.title).toEqual('NestJS Guide');
+    expect(result.author).toEqual('John Doe');
+    expect(result.ISBN).toEqual('123456789');
     expect(result.availableCopies).toEqual(5);
   });
 
   it('should update a book', async () => {
     const result = await controller.updateBook('1', {
       title: 'Updated NestJS Guide',
+      author: 'Jane Doe',
+      ISBN: '987654321',
       availableCopies: 10,
     });
     expect(result.title).toEqual('Updated NestJS Guide');
+    expect(result.author).toEqual('Jane Doe');
+    expect(result.ISBN).toEqual('987654321');
     expect(result.availableCopies).toEqual(10);
   });
 
