@@ -28,7 +28,12 @@ describe('BooksService', () => {
       availableCopies: 5,
     });
 
-    const result = await service.createBook('NestJS Guide', 'John Doe', '123456789', 5);
+    const result = await service.createBook(
+      'NestJS Guide',
+      'John Doe',
+      '123456789',
+      5,
+    );
     expect(createBookSpy).toHaveBeenCalledTimes(1);
     expect(result.title).toEqual('NestJS Guide');
     expect(result.author).toEqual('John Doe');
@@ -84,13 +89,15 @@ describe('BooksService', () => {
   });
 
   it('should fetch a book by ID', async () => {
-    const getBookByIdSpy = jest.spyOn(prisma.book, 'findUnique').mockResolvedValue({
-      id: 1,
-      title: 'NestJS Guide',
-      author: 'John Doe',
-      ISBN: '123456789',
-      availableCopies: 5,
-    });
+    const getBookByIdSpy = jest
+      .spyOn(prisma.book, 'findUnique')
+      .mockResolvedValue({
+        id: 1,
+        title: 'NestJS Guide',
+        author: 'John Doe',
+        ISBN: '123456789',
+        availableCopies: 5,
+      });
 
     const result = await service.getBookById(1);
     expect(getBookByIdSpy).toHaveBeenCalledTimes(1);
@@ -100,7 +107,9 @@ describe('BooksService', () => {
   });
 
   it('should return null when book is not found by ID', async () => {
-    const getBookByIdSpy = jest.spyOn(prisma.book, 'findUnique').mockResolvedValue(null);
+    const getBookByIdSpy = jest
+      .spyOn(prisma.book, 'findUnique')
+      .mockResolvedValue(null);
 
     const result = await service.getBookById(999); // Non-existing ID
     expect(getBookByIdSpy).toHaveBeenCalledTimes(1);
@@ -123,7 +132,9 @@ describe('BooksService', () => {
   });
 
   it('should return null when deleting a non-existing book', async () => {
-    const deleteBookSpy = jest.spyOn(prisma.book, 'delete').mockResolvedValue(null);
+    const deleteBookSpy = jest
+      .spyOn(prisma.book, 'delete')
+      .mockResolvedValue(null);
 
     const result = await service.deleteBook(999); // Non-existing ID
     expect(deleteBookSpy).toHaveBeenCalledTimes(1);

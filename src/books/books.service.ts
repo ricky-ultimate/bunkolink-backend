@@ -5,9 +5,14 @@ import { PrismaService } from '../prisma/prisma.service';
 export class BooksService {
   constructor(private prisma: PrismaService) {}
 
-  async createBook(title: string, author:string, ISBN:string, availableCopies: number) {
+  async createBook(
+    title: string,
+    author: string,
+    ISBN: string,
+    availableCopies: number,
+  ) {
     return this.prisma.book.create({
-      data: { title,author, ISBN, availableCopies },
+      data: { title, author, ISBN, availableCopies },
     });
   }
 
@@ -21,7 +26,12 @@ export class BooksService {
 
   async updateBook(
     id: number,
-    data: Partial<{ title: string; author: string; ISBN: string; availableCopies: number }>,
+    data: Partial<{
+      title: string;
+      author: string;
+      ISBN: string;
+      availableCopies: number;
+    }>,
   ) {
     return this.prisma.book.update({
       where: { id },

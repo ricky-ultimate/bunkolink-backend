@@ -13,39 +13,31 @@ describe('StudentsController', () => {
         {
           provide: StudentsService,
           useValue: {
-            createStudent: jest
-              .fn()
-              .mockResolvedValue({
-                id: 1,
-                name: 'John Doe',
-                matricNumber: 'MT123',
-              }),
+            createStudent: jest.fn().mockResolvedValue({
+              id: 1,
+              name: 'John Doe',
+              matricNumber: 'MT123',
+            }),
             getAllStudents: jest
               .fn()
               .mockResolvedValue([
                 { id: 1, name: 'John Doe', matricNumber: 'MT123' },
               ]),
-            getStudentById: jest
-              .fn()
-              .mockResolvedValue({
-                id: 1,
-                name: 'John Doe',
-                matricNumber: 'MT123',
-              }),
-            updateStudent: jest
-              .fn()
-              .mockResolvedValue({
-                id: 1,
-                name: 'John Smith',
-                matricNumber: 'MT123',
-              }),
-            deleteStudent: jest
-              .fn()
-              .mockResolvedValue({
-                id: 1,
-                name: 'John Doe',
-                matricNumber: 'MT123',
-              }),
+            getStudentById: jest.fn().mockResolvedValue({
+              id: 1,
+              name: 'John Doe',
+              matricNumber: 'MT123',
+            }),
+            updateStudent: jest.fn().mockResolvedValue({
+              id: 1,
+              name: 'John Smith',
+              matricNumber: 'MT123',
+            }),
+            deleteStudent: jest.fn().mockResolvedValue({
+              id: 1,
+              name: 'John Doe',
+              matricNumber: 'MT123',
+            }),
           },
         },
       ],

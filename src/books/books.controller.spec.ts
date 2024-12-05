@@ -13,44 +13,36 @@ describe('BooksController', () => {
         {
           provide: BooksService,
           useValue: {
-            createBook: jest
-              .fn()
-              .mockResolvedValue({
+            createBook: jest.fn().mockResolvedValue({
+              id: 1,
+              title: 'NestJS Guide',
+              author: 'John Doe',
+              ISBN: '123456789',
+              availableCopies: 5,
+            }),
+            getAllBooks: jest.fn().mockResolvedValue([
+              {
                 id: 1,
                 title: 'NestJS Guide',
                 author: 'John Doe',
                 ISBN: '123456789',
                 availableCopies: 5,
-              }),
-            getAllBooks: jest
-              .fn()
-              .mockResolvedValue([
-                {
-                  id: 1,
-                  title: 'NestJS Guide',
-                  author: 'John Doe',
-                  ISBN: '123456789',
-                  availableCopies: 5,
-                },
-              ]),
-            getBookById: jest
-              .fn()
-              .mockResolvedValue({
-                id: 1,
-                title: 'NestJS Guide',
-                author: 'John Doe',
-                ISBN: '123456789',
-                availableCopies: 5,
-              }),
-            updateBook: jest
-              .fn()
-              .mockResolvedValue({
-                id: 1,
-                title: 'Updated NestJS Guide',
-                author: 'Jane Doe',
-                ISBN: '987654321',
-                availableCopies: 10,
-              }),
+              },
+            ]),
+            getBookById: jest.fn().mockResolvedValue({
+              id: 1,
+              title: 'NestJS Guide',
+              author: 'John Doe',
+              ISBN: '123456789',
+              availableCopies: 5,
+            }),
+            updateBook: jest.fn().mockResolvedValue({
+              id: 1,
+              title: 'Updated NestJS Guide',
+              author: 'Jane Doe',
+              ISBN: '987654321',
+              availableCopies: 10,
+            }),
             deleteBook: jest.fn().mockResolvedValue({ id: 1 }),
           },
         },
