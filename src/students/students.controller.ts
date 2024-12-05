@@ -8,22 +8,16 @@ import {
   Delete,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
+import { CreateStudentDto } from './dto/create-student.dto';
+import { UpdateStudentDto } from './dto/update-student.dto';
 
 @Controller('v1/students')
 export class StudentsController {
   constructor(private studentsService: StudentsService) {}
 
   @Post()
-  async createStudent(
-    @Body()
-    body: {
-      name: string;
-      matricNumber: string;
-      level: string;
-      department: string;
-    },
-  ) {
-    return this.studentsService.createStudent(body);
+  async createStudent(@Body() createStudentDto: CreateStudentDto) {
+    return this.studentsService.createStudent(createStudentDto);
   }
 
   @Get()
@@ -39,15 +33,9 @@ export class StudentsController {
   @Patch(':id')
   async updateStudent(
     @Param('id') id: string,
-    @Body()
-    body: Partial<{
-      name: string;
-      matricNumber: string;
-      level: string;
-      department: string;
-    }>,
+    @Body() updateStudentDto: UpdateStudentDto,
   ) {
-    return this.studentsService.updateStudent(+id, body);
+    return this.studentsService.updateStudent(+id, updateStudentDto);
   }
 
   @Delete(':id')

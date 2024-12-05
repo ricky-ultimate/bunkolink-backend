@@ -8,26 +8,20 @@ import {
   Delete,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
+import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('v1/books')
 export class BooksController {
   constructor(private booksService: BooksService) {}
 
   @Post()
-  async createBook(
-    @Body()
-    body: {
-      title: string;
-      author: string;
-      ISBN: string;
-      availableCopies: number;
-    },
-  ) {
+  async createBook(@Body() createBookDto: CreateBookDto) {
     return this.booksService.createBook(
-      body.title,
-      body.author,
-      body.ISBN,
-      body.availableCopies,
+      createBookDto.title,
+      createBookDto.author,
+      createBookDto.ISBN,
+      createBookDto.availableCopies,
     );
   }
 
@@ -44,15 +38,9 @@ export class BooksController {
   @Patch(':id')
   async updateBook(
     @Param('id') id: string,
-    @Body()
-    body: Partial<{
-      title: string;
-      author: string;
-      ISBN: string;
-      availableCopies: number;
-    }>,
+    @Body() updateBookDto: UpdateBookDto,
   ) {
-    return this.booksService.updateBook(+id, body);
+    return this.booksService.updateBook(+id, updateBookDto);
   }
 
   @Delete(':id')
