@@ -106,14 +106,18 @@ describe('BooksService', () => {
     expect(result.ISBN).toEqual('123456789');
   });
 
-  it('should return null when book is not found by ID', async () => {
+  it('should throw an error if book is not found by ID', async () => {
     const getBookByIdSpy = jest
       .spyOn(prisma.book, 'findUnique')
       .mockResolvedValue(null);
 
-    const result = await service.getBookById(999); // Non-existing ID
-    expect(getBookByIdSpy).toHaveBeenCalledTimes(1);
-    expect(result).toBeNull();
+    // const result = await service.getBookById(999); // Non-existing ID
+    // expect(getBookByIdSpy).toHaveBeenCalledTimes(1);
+    // expect(result).toBeNull();
+
+    await expect(service.getBookById(999)).rejects.toThrow(
+        'Book with ID 999 not found.',
+      );
   });
 
   it('should delete a book', async () => {
