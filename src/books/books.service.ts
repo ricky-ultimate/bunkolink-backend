@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -11,9 +15,13 @@ export class BooksService {
     ISBN: string,
     availableCopies: number,
   ) {
-    return this.prisma.book.create({
-      data: { title, author, ISBN, availableCopies },
-    });
+    try {
+      return this.prisma.book.create({
+        data: { title, author, ISBN, availableCopies },
+      });
+    } catch (error) {
+      throw new BadRequestException('Error creating the book.');
+    }
   }
 
   async getAllBooks() {
@@ -21,7 +29,11 @@ export class BooksService {
   }
 
   async getBookById(id: number) {
-    return this.prisma.book.findUnique({ where: { id } });
+    const book = await this.prisma.book.findUnique({ where: { id } });
+    if (!book) {
+      throw new NotFoundException(`Book with ID ${id} not found.`);
+    }
+    return book;
   }
 
   async updateBook(
@@ -33,13 +45,25 @@ export class BooksService {
       availableCopies: number;
     }>,
   ) {
-    return this.prisma.book.update({
-      where: { id },
-      data,
-    });
+    try {
+      return this.prisma.book.update({
+        where: { id },
+        data,
+      });
+    } catch (error) {
+      throw new NotFoundException(
+        `Unable to update. Book with ID ${id} not found.`,
+      );
+    }
   }
 
   async deleteBook(id: number) {
-    return this.prisma.book.delete({ where: { id } });
+    try {
+      return this.prisma.book.delete({ where: { id } });
+    } catch (error) {
+      throw new NotFoundException(
+        `Unable to delete. Book with ID ${id} not found.`,
+      );
+    }
   }
 }
