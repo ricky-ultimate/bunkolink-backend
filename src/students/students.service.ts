@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -11,9 +15,13 @@ export class StudentsService {
     level: string;
     department: string;
   }) {
-    return this.prisma.student.create({
-      data,
-    });
+    try {
+      return this.prisma.student.create({
+        data,
+      });
+    } catch (error) {
+      throw new BadRequestException('Error creating the student.');
+    }
   }
 
   async getAllStudents() {
@@ -21,9 +29,13 @@ export class StudentsService {
   }
 
   async getStudentById(id: number) {
-    return this.prisma.student.findUnique({
+    const student = await this.prisma.student.findUnique({
       where: { id },
     });
+    if (!student) {
+      throw new NotFoundException(`Student with ID ${id} not found.`);
+    }
+    return student;
   }
 
   async updateStudent(
@@ -35,15 +47,27 @@ export class StudentsService {
       department: string;
     }>,
   ) {
-    return this.prisma.student.update({
-      where: { id },
-      data,
-    });
+    try {
+      return this.prisma.student.update({
+        where: { id },
+        data,
+      });
+    } catch (error) {
+      throw new NotFoundException(
+        `Unable to update. Student with ID ${id} not found.`,
+      );
+    }
   }
 
   async deleteStudent(id: number) {
-    return this.prisma.student.delete({
-      where: { id },
-    });
+    try {
+      return this.prisma.student.delete({
+        where: { id },
+      });
+    } catch (error) {
+      throw new NotFoundException(
+        `Unable to delete. Student with ID ${id} not found.`,
+      );
+    }
   }
 }
