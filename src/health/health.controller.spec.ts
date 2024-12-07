@@ -42,7 +42,9 @@ describe('HealthController', () => {
     });
 
     it('should return Unhealthy status when DB is unreachable', async () => {
-      jest.spyOn(prisma.book, 'findMany').mockRejectedValueOnce(new Error('DB Error'));
+      jest
+        .spyOn(prisma.book, 'findMany')
+        .mockRejectedValueOnce(new Error('DB Error'));
 
       const result = await controller.getHealth();
 

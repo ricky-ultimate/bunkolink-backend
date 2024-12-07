@@ -116,8 +116,8 @@ describe('BooksService', () => {
     // expect(result).toBeNull();
 
     await expect(service.getBookById(999)).rejects.toThrow(
-        'Book with ID 999 not found.',
-      );
+      'Book with ID 999 not found.',
+    );
   });
 
   it('should delete a book', async () => {

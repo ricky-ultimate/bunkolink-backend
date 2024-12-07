@@ -104,7 +104,7 @@ describe('StudentsService', () => {
     // expect(findStudentSpy).toHaveBeenCalledTimes(1);
     // expect(deletedStudent).toBeNull(); // Ensure that student no longer exists
     await expect(service.getStudentById(1)).rejects.toThrow(
-        'Student with ID 1 not found.',
-      );
+      'Student with ID 1 not found.',
+    );
   });
 });
