@@ -100,8 +100,11 @@ describe('StudentsService', () => {
       .spyOn(prisma.student, 'findUnique')
       .mockResolvedValue(null);
 
-    const deletedStudent = await service.getStudentById(1);
-    expect(findStudentSpy).toHaveBeenCalledTimes(1);
-    expect(deletedStudent).toBeNull(); // Ensure that student no longer exists
+    // const deletedStudent = await service.getStudentById(1);
+    // expect(findStudentSpy).toHaveBeenCalledTimes(1);
+    // expect(deletedStudent).toBeNull(); // Ensure that student no longer exists
+    await expect(service.getStudentById(1)).rejects.toThrow(
+        'Student with ID 1 not found.',
+      );
   });
 });
