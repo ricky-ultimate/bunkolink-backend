@@ -8,7 +8,7 @@ import {
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
@@ -18,14 +18,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message =
-      exception instanceof HttpException
-        ? exception.getResponse()
-        : 'Internal server error';
+    let message = exception.message || 'Internal server error';
+
+    // Handle Prisma-specific errors
+    if (exception.code === 'P2002') {
+      message = 'Unique constraint violation.';
+    } else if (exception.code === 'P2025') {
+      message = 'Record not found.';
+    }
 
     response.status(status).json({
       statusCode: status,
-      message: message,
+      message,
       timestamp: new Date().toISOString(),
       path: request.url,
     });
