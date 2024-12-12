@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -6,22 +10,37 @@ export class BorrowedBooksService {
   constructor(private prisma: PrismaService) {}
 
   async borrowBook(bookId: number, studentId: number) {
-    // Check book availability
     const book = await this.prisma.book.findUnique({ where: { id: bookId } });
-    if (!book || book.availableCopies < 1) {
-      throw new Error('Book not available');
+    if (!book) {
+      throw new NotFoundException(`Book with ID ${bookId} not found.`);
+    }
+    if (book.availableCopies < 1) {
+      throw new BadRequestException(
+        'No copies of this book are currently available.',
+      );
     }
 
-    // Borrow book and decrement available copies
-    await this.prisma.$transaction([
-      this.prisma.borrowedBook.create({
-        data: { bookId, studentId },
-      }),
-      this.prisma.book.update({
-        where: { id: bookId },
-        data: { availableCopies: book.availableCopies - 1 },
-      }),
-    ]);
+    const student = await this.prisma.student.findUnique({
+      where: { id: studentId },
+    });
+    if (!student) {
+      throw new NotFoundException(`Student with ID ${studentId} not found.`);
+    }
+
+    try {
+      // Borrow book and decrement available copies
+      await this.prisma.$transaction([
+        this.prisma.borrowedBook.create({
+          data: { bookId, studentId },
+        }),
+        this.prisma.book.update({
+          where: { id: bookId },
+          data: { availableCopies: book.availableCopies - 1 },
+        }),
+      ]);
+    } catch (error) {
+      throw new BadRequestException('Error borrowing the book.');
+    }
   }
 
   async returnBook(borrowedBookId: number) {
@@ -30,21 +49,29 @@ export class BorrowedBooksService {
       include: { book: true },
     });
 
-    if (!borrowedBook || borrowedBook.returnDate) {
-      throw new Error('Borrowed book not found or already returned');
+    if (!borrowedBook) {
+      throw new NotFoundException(
+        `Borrowed record with ID ${borrowedBookId} not found.`,
+      );
+    }
+    if (borrowedBook.returnDate) {
+      throw new BadRequestException('This book has already been returned.');
     }
 
-    // Return book and increment available copies
-    await this.prisma.$transaction([
-      this.prisma.borrowedBook.update({
-        where: { id: borrowedBookId },
-        data: { returnDate: new Date() },
-      }),
-      this.prisma.book.update({
-        where: { id: borrowedBook.bookId },
-        data: { availableCopies: borrowedBook.book.availableCopies + 1 },
-      }),
-    ]);
+    try {
+      await this.prisma.$transaction([
+        this.prisma.borrowedBook.update({
+          where: { id: borrowedBookId },
+          data: { returnDate: new Date() },
+        }),
+        this.prisma.book.update({
+          where: { id: borrowedBook.bookId },
+          data: { availableCopies: borrowedBook.book.availableCopies + 1 },
+        }),
+      ]);
+    } catch (error) {
+      throw new BadRequestException('Error returning the book.');
+    }
   }
 
   async getAllBorrowedBooks() {
