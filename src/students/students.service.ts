@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -20,6 +21,11 @@ export class StudentsService {
         data,
       });
     } catch (error) {
+      if (error.code === 'P2002') {
+        throw new ConflictException(
+          'A student with this matric number already exists.',
+        );
+      }
       throw new BadRequestException('Error creating the student.');
     }
   }
@@ -53,9 +59,12 @@ export class StudentsService {
         data,
       });
     } catch (error) {
-      throw new NotFoundException(
-        `Unable to update. Student with ID ${id} not found.`,
-      );
+      if (error.code === 'P2025') {
+        throw new NotFoundException(
+          `Unable to update. Student with ID ${id} not found.`,
+        );
+      }
+      throw new BadRequestException('Error updating the student.');
     }
   }
 
@@ -65,9 +74,12 @@ export class StudentsService {
         where: { id },
       });
     } catch (error) {
-      throw new NotFoundException(
-        `Unable to delete. Student with ID ${id} not found.`,
-      );
+      if (error.code === 'P2025') {
+        throw new NotFoundException(
+          `Unable to delete. Student with ID ${id} not found.`,
+        );
+      }
+      throw new BadRequestException('Error deleting the student.');
     }
   }
 }
