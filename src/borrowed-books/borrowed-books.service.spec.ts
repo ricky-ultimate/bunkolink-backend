@@ -53,7 +53,7 @@ describe('BorrowedBooksService', () => {
     } as any);
 
     await expect(service.borrowBook(1, 1)).rejects.toThrow(
-      'Book not available',
+      'No copies of this book are currently available.',
     );
   });
 
@@ -93,7 +93,7 @@ describe('BorrowedBooksService', () => {
     jest.spyOn(prisma.borrowedBook, 'findUnique').mockResolvedValue(null);
 
     await expect(service.returnBook(1)).rejects.toThrow(
-      'Borrowed book not found or already returned',
+      'Borrowed record with ID 1 not found.',
     );
   });
 
