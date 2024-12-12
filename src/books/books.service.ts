@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -20,6 +21,10 @@ export class BooksService {
         data: { title, author, ISBN, availableCopies },
       });
     } catch (error) {
+      if (error.code === 'P2002') {
+        // Prisma unique constraint violation
+        throw new ConflictException('A book with this ISBN already exists.');
+      }
       throw new BadRequestException('Error creating the book.');
     }
   }
@@ -51,9 +56,13 @@ export class BooksService {
         data,
       });
     } catch (error) {
-      throw new NotFoundException(
-        `Unable to update. Book with ID ${id} not found.`,
-      );
+      if (error.code === 'P2025') {
+        // Prisma "Record to update not found"
+        throw new NotFoundException(
+          `Unable to update. Book with ID ${id} not found.`,
+        );
+      }
+      throw new BadRequestException('Error updating the book.');
     }
   }
 
@@ -61,9 +70,12 @@ export class BooksService {
     try {
       return this.prisma.book.delete({ where: { id } });
     } catch (error) {
-      throw new NotFoundException(
-        `Unable to delete. Book with ID ${id} not found.`,
-      );
+      if (error.code === 'P2025') {
+        throw new NotFoundException(
+          `Unable to delete. Book with ID ${id} not found.`,
+        );
+      }
+      throw new BadRequestException('Error deleting the book.');
     }
   }
 }
