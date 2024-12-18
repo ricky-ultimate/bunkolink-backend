@@ -17,7 +17,7 @@ export class BooksService {
     availableCopies: number,
   ) {
     try {
-      return this.prisma.book.create({
+      return await this.prisma.book.create({
         data: { title, author, ISBN, availableCopies },
       });
     } catch (error) {
@@ -51,7 +51,7 @@ export class BooksService {
     }>,
   ) {
     try {
-      return this.prisma.book.update({
+      return await this.prisma.book.update({
         where: { id },
         data,
       });
@@ -68,7 +68,7 @@ export class BooksService {
 
   async deleteBook(id: number) {
     try {
-      return this.prisma.book.delete({ where: { id } });
+      return await this.prisma.book.delete({ where: { id } });
     } catch (error) {
       if (error.code === 'P2025') {
         throw new NotFoundException(

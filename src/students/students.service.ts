@@ -17,7 +17,7 @@ export class StudentsService {
     department: string;
   }) {
     try {
-      return this.prisma.student.create({
+      return await this.prisma.student.create({
         data,
       });
     } catch (error) {
@@ -54,7 +54,7 @@ export class StudentsService {
     }>,
   ) {
     try {
-      return this.prisma.student.update({
+      return await this.prisma.student.update({
         where: { id },
         data,
       });
@@ -70,7 +70,7 @@ export class StudentsService {
 
   async deleteStudent(id: number) {
     try {
-      return this.prisma.student.delete({
+      return await this.prisma.student.delete({
         where: { id },
       });
     } catch (error) {
