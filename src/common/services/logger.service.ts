@@ -5,22 +5,27 @@ export class AppLoggerService {
   private readonly logger = new Logger('ApplicationLogger');
 
   log(message: string, context?: string) {
-    this.logger.log(message, context);
+    const formattedMessage = context ? `[${context}] ${message}` : message;
+    this.logger.log(formattedMessage);
   }
 
-  error(message: string, context?: string) {
-    this.logger.error(message, context);
+  error(message: string, trace?: string, context?: string) {
+    const formattedMessage = context ? `[${context}] ${message}` : message;
+    this.logger.error(formattedMessage, trace);
   }
 
   warn(message: string, context?: string) {
-    this.logger.warn(message, context);
+    const formattedMessage = context ? `[${context}] ${message}` : message;
+    this.logger.warn(formattedMessage);
   }
 
   debug(message: string, context?: string) {
-    this.logger.debug(message, context);
+    const formattedMessage = context ? `[${context}] ${message}` : message;
+    this.logger.debug(formattedMessage);
   }
 
   verbose(message: string, context?: string) {
-    this.logger.verbose(message, context);
+    const formattedMessage = context ? `[${context}] ${message}` : message;
+    this.logger.verbose(formattedMessage);
   }
 }
