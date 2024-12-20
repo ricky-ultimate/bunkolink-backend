@@ -12,11 +12,11 @@ export class BorrowedBooksService {
   async borrowBook(bookId: number, studentId: number) {
     const book = await this.prisma.book.findUnique({ where: { id: bookId } });
     if (!book) {
-      throw new NotFoundException(`Book with ID ${bookId} not found.`);
+      throw new NotFoundException(`Unable to borrow. Book with ID ${bookId} not found.`);
     }
     if (book.availableCopies < 1) {
       throw new BadRequestException(
-        'No copies of this book are currently available.',
+        `Unable to borrow. Book with ID: ${bookId} has no available copies`
       );
     }
 
@@ -24,12 +24,12 @@ export class BorrowedBooksService {
       where: { id: studentId },
     });
     if (!student) {
-      throw new NotFoundException(`Student with ID ${studentId} not found.`);
+      throw new NotFoundException(`Unable to borrow book with ID: ${bookId}. Student with ID ${studentId} not found.`);
     }
 
     try {
       // Borrow book and decrement available copies
-      await this.prisma.$transaction([
+      return await this.prisma.$transaction([
         this.prisma.borrowedBook.create({
           data: { bookId, studentId },
         }),
@@ -39,7 +39,7 @@ export class BorrowedBooksService {
         }),
       ]);
     } catch (error) {
-      throw new BadRequestException('Error borrowing the book.');
+      throw new BadRequestException(`Failed to borrow book with ID: ${bookId} for student ID: ${studentId}`,);
     }
   }
 
@@ -55,7 +55,7 @@ export class BorrowedBooksService {
       );
     }
     if (borrowedBook.returnDate) {
-      throw new BadRequestException('This book has already been returned.');
+      throw new BadRequestException(`Borrowed book with ID ${borrowedBookId} already returned.`);
     }
 
     try {
@@ -70,7 +70,7 @@ export class BorrowedBooksService {
         }),
       ]);
     } catch (error) {
-      throw new BadRequestException('Error returning the book.');
+      throw new BadRequestException(`Failed to return book with ID: ${borrowedBookId}`);
     }
   }
 

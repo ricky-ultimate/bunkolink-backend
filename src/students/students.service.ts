@@ -26,7 +26,7 @@ export class StudentsService {
           `Duplicate student creation attempted: Matric Number ${matricNumber}`,
         );
       }
-      throw new BadRequestException('Error creating the student.');
+      throw new BadRequestException(`Failed to create student with Matric Number ${matricNumber}`);
     }
   }
 
@@ -64,7 +64,7 @@ export class StudentsService {
           `Unable to update. Student with ID ${id} not found.`,
         );
       }
-      throw new BadRequestException('Error updating the student.');
+      throw new BadRequestException(`Failed to update student with ID ${id}`);
     }
   }
 
@@ -79,7 +79,7 @@ export class StudentsService {
           `Unable to delete. Student with ID ${id} not found.`,
         );
       }
-      throw new BadRequestException('Error deleting the student.');
+      throw new BadRequestException(`Failed to delete student with ID ${id}`);
     }
   }
 }

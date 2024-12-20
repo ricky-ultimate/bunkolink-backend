@@ -25,7 +25,7 @@ export class BooksService {
         // Prisma unique constraint violation
         throw new ConflictException(`Duplicate book creation attempted: ISBN ${ISBN}`);
       }
-      throw new BadRequestException('Error creating the book.');
+      throw new BadRequestException(`Failed to create book with ISBN ${ISBN}`);
     }
   }
 
@@ -62,7 +62,7 @@ export class BooksService {
           `Unable to update. Book with ID ${id} not found.`,
         );
       }
-      throw new BadRequestException('Error updating the book.');
+      throw new BadRequestException(`Failed to update book with ID ${id}`);
     }
   }
 
@@ -75,7 +75,7 @@ export class BooksService {
           `Unable to delete. Book with ID ${id} not found.`,
         );
       }
-      throw new BadRequestException('Error deleting the book.');
+      throw new BadRequestException(`Failed to delete book with ID ${id}`);
     }
   }
 }
