@@ -12,11 +12,13 @@ export class BorrowedBooksService {
   async borrowBook(bookId: number, studentId: number) {
     const book = await this.prisma.book.findUnique({ where: { id: bookId } });
     if (!book) {
-      throw new NotFoundException(`Unable to borrow. Book with ID ${bookId} not found.`);
+      throw new NotFoundException(
+        `Unable to borrow. Book with ID ${bookId} not found.`,
+      );
     }
     if (book.availableCopies < 1) {
       throw new BadRequestException(
-        `Unable to borrow. Book with ID: ${bookId} has no available copies`
+        `Unable to borrow. Book with ID: ${bookId} has no available copies`,
       );
     }
 
@@ -24,7 +26,9 @@ export class BorrowedBooksService {
       where: { id: studentId },
     });
     if (!student) {
-      throw new NotFoundException(`Unable to borrow book with ID: ${bookId}. Student with ID ${studentId} not found.`);
+      throw new NotFoundException(
+        `Unable to borrow book with ID: ${bookId}. Student with ID ${studentId} not found.`,
+      );
     }
 
     try {
@@ -39,7 +43,9 @@ export class BorrowedBooksService {
         }),
       ]);
     } catch (error) {
-      throw new BadRequestException(`Failed to borrow book with ID: ${bookId} for student ID: ${studentId}`,);
+      throw new BadRequestException(
+        `Failed to borrow book with ID: ${bookId} for student ID: ${studentId}`,
+      );
     }
   }
 
@@ -55,7 +61,9 @@ export class BorrowedBooksService {
       );
     }
     if (borrowedBook.returnDate) {
-      throw new BadRequestException(`Borrowed book with ID ${borrowedBookId} already returned.`);
+      throw new BadRequestException(
+        `Borrowed book with ID ${borrowedBookId} already returned.`,
+      );
     }
 
     try {
@@ -70,7 +78,9 @@ export class BorrowedBooksService {
         }),
       ]);
     } catch (error) {
-      throw new BadRequestException(`Failed to return book with ID: ${borrowedBookId}`);
+      throw new BadRequestException(
+        `Failed to return book with ID: ${borrowedBookId}`,
+      );
     }
   }
 

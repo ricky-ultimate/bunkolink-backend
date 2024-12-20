@@ -18,7 +18,7 @@ export class StudentsService {
   ) {
     try {
       return await this.prisma.student.create({
-        data: {name, matricNumber, level, department}
+        data: { name, matricNumber, level, department },
       });
     } catch (error) {
       if (error.code === 'P2002') {
@@ -26,7 +26,9 @@ export class StudentsService {
           `Duplicate student creation attempted: Matric Number ${matricNumber}`,
         );
       }
-      throw new BadRequestException(`Failed to create student with Matric Number ${matricNumber}`);
+      throw new BadRequestException(
+        `Failed to create student with Matric Number ${matricNumber}`,
+      );
     }
   }
 
@@ -39,7 +41,9 @@ export class StudentsService {
       where: { id },
     });
     if (!student) {
-      throw new NotFoundException(`Unable to fetch. Student with ID ${id} not found.`);
+      throw new NotFoundException(
+        `Unable to fetch. Student with ID ${id} not found.`,
+      );
     }
     return student;
   }

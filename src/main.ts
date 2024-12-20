@@ -7,7 +7,7 @@ import { AppLoggerService } from './common/services/logger.service';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const logger = app.get(AppLoggerService)
+  const logger = app.get(AppLoggerService);
 
   app.useGlobalPipes(
     new ValidationPipe({

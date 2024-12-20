@@ -23,7 +23,9 @@ export class BooksService {
     } catch (error) {
       if (error.code === 'P2002') {
         // Prisma unique constraint violation
-        throw new ConflictException(`Duplicate book creation attempted: ISBN ${ISBN}`);
+        throw new ConflictException(
+          `Duplicate book creation attempted: ISBN ${ISBN}`,
+        );
       }
       throw new BadRequestException(`Failed to create book with ISBN ${ISBN}`);
     }
@@ -36,7 +38,9 @@ export class BooksService {
   async getBookById(id: number) {
     const book = await this.prisma.book.findUnique({ where: { id } });
     if (!book) {
-      throw new NotFoundException(`Unable to fetch. Book with ID ${id} not found.`);
+      throw new NotFoundException(
+        `Unable to fetch. Book with ID ${id} not found.`,
+      );
     }
     return book;
   }
