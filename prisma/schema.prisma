@@ -41,3 +41,12 @@ model BorrowedBook {
     book    Book    @relation(fields: [bookId], references: [id])
     student Student @relation(fields: [studentId], references: [id])
 }
+
+model AuditLog {
+    id         Int      @id @default(autoincrement())
+    action     String
+    entityType String
+    entityId   Int
+    message    String
+    timestamp  DateTime @default(now())
+}
