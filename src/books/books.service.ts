@@ -23,7 +23,7 @@ export class BooksService {
     } catch (error) {
       if (error.code === 'P2002') {
         // Prisma unique constraint violation
-        throw new ConflictException('A book with this ISBN already exists.');
+        throw new ConflictException(`Duplicate book creation attempted: ISBN ${ISBN}`);
       }
       throw new BadRequestException('Error creating the book.');
     }
