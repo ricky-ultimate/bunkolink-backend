@@ -34,7 +34,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // Log the error
     this.logger.error(
       `HTTP ${status} - ${message}`,
-      `${request.method} ${request.url}`,
+      `\t\t\t\t\t\t\t\t  ${request.method} ${request.url}`,
     );
 
     response.status(status).json({
