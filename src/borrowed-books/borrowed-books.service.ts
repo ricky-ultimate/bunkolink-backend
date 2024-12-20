@@ -4,10 +4,14 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditLogService } from '../common/services/audit-log.service';
 
 @Injectable()
 export class BorrowedBooksService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private auditLogService: AuditLogService,
+  ) {}
 
   async borrowBook(bookId: number, studentId: number) {
     const book = await this.prisma.book.findUnique({ where: { id: bookId } });
@@ -33,7 +37,7 @@ export class BorrowedBooksService {
 
     try {
       // Borrow book and decrement available copies
-      return await this.prisma.$transaction([
+      const borrow = await this.prisma.$transaction([
         this.prisma.borrowedBook.create({
           data: { bookId, studentId },
         }),
@@ -42,6 +46,14 @@ export class BorrowedBooksService {
           data: { availableCopies: book.availableCopies - 1 },
         }),
       ]);
+
+      await this.auditLogService.logAction(
+        'BORROW',
+        'BorrowedBook',
+        bookId,
+        `Student with ID ${studentId} borrowed book with ID ${bookId}`,
+      );
+      return borrow;
     } catch (error) {
       throw new BadRequestException(
         `Failed to borrow book with ID: ${bookId} for student ID: ${studentId}`,
@@ -67,7 +79,7 @@ export class BorrowedBooksService {
     }
 
     try {
-      await this.prisma.$transaction([
+      const result = await this.prisma.$transaction([
         this.prisma.borrowedBook.update({
           where: { id: borrowedBookId },
           data: { returnDate: new Date() },
@@ -77,6 +89,14 @@ export class BorrowedBooksService {
           data: { availableCopies: borrowedBook.book.availableCopies + 1 },
         }),
       ]);
+
+      await this.auditLogService.logAction(
+        'RETURN',
+        'BorrowedBook',
+        borrowedBookId,
+        `Book with ID ${borrowedBook.bookId} returned by borrowed record ID ${borrowedBookId}`,
+      );
+      return result;
     } catch (error) {
       throw new BadRequestException(
         `Failed to return book with ID: ${borrowedBookId}`,
@@ -85,11 +105,19 @@ export class BorrowedBooksService {
   }
 
   async getAllBorrowedBooks() {
-    return this.prisma.borrowedBook.findMany({
+    const borrowedBooks = await this.prisma.borrowedBook.findMany({
       include: {
         book: true,
         student: true,
       },
     });
+
+    await this.auditLogService.logAction(
+      'FETCH_ALL',
+      'BorrowedBook',
+      0,
+      'Fetched all borrowed book records',
+    );
+    return borrowedBooks;
   }
 }
