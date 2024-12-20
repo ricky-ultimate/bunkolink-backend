@@ -1,8 +1,8 @@
 {
   "name": "bunkolink",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "A backend system for managing a library catalog",
+  "author": "ricky-ultimate",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
