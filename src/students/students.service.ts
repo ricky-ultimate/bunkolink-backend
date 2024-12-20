@@ -10,15 +10,15 @@ import { PrismaService } from '../prisma/prisma.service';
 export class StudentsService {
   constructor(private prisma: PrismaService) {}
 
-  async createStudent(data: {
-    name: string;
-    matricNumber: string;
-    level: string;
-    department: string;
-  }) {
+  async createStudent(
+    name: string,
+    matricNumber: string,
+    level: string,
+    department: string,
+  ) {
     try {
       return await this.prisma.student.create({
-        data,
+        data: {name, matricNumber, level, department}
       });
     } catch (error) {
       if (error.code === 'P2002') {

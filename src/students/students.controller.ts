@@ -17,7 +17,12 @@ export class StudentsController {
 
   @Post()
   async createStudent(@Body() createStudentDto: CreateStudentDto) {
-    return this.studentsService.createStudent(createStudentDto);
+    return this.studentsService.createStudent(
+        createStudentDto.name,
+        createStudentDto.matricNumber,
+        createStudentDto.level,
+        createStudentDto.department,
+    );
   }
 
   @Get()
