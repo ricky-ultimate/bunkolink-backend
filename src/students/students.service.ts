@@ -39,7 +39,7 @@ export class StudentsService {
       where: { id },
     });
     if (!student) {
-      throw new NotFoundException(`Student with ID ${id} not found.`);
+      throw new NotFoundException(`Unable to fetch. Student with ID ${id} not found.`);
     }
     return student;
   }

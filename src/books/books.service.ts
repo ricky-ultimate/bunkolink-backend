@@ -36,7 +36,7 @@ export class BooksService {
   async getBookById(id: number) {
     const book = await this.prisma.book.findUnique({ where: { id } });
     if (!book) {
-      throw new NotFoundException(`Book with ID ${id} not found.`);
+      throw new NotFoundException(`Unable to fetch. Book with ID ${id} not found.`);
     }
     return book;
   }
