@@ -6,10 +6,11 @@ import { StudentsModule } from './students/students.module';
 import { BorrowedBooksModule } from './borrowed-books/borrowed-books.module';
 import { HealthController } from './health/health.controller';
 import { PrismaModule } from './prisma/prisma.module';
+import { AppLoggerService } from './common/services/logger.service';
 
 @Module({
   imports: [BooksModule, StudentsModule, BorrowedBooksModule, PrismaModule],
   controllers: [AppController, HealthController],
-  providers: [AppService],
+  providers: [AppService, AppLoggerService],
 })
 export class AppModule {}
