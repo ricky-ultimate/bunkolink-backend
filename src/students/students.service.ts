@@ -23,7 +23,7 @@ export class StudentsService {
     } catch (error) {
       if (error.code === 'P2002') {
         throw new ConflictException(
-          'A student with this matric number already exists.',
+          `Duplicate student creation attempted: Matric Number ${matricNumber}`,
         );
       }
       throw new BadRequestException('Error creating the student.');
