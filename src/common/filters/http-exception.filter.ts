@@ -5,9 +5,12 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { AppLoggerService } from '../services/logger.service';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  constructor(private readonly logger: AppLoggerService) {}
+
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
@@ -18,13 +21,25 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    let message = exception.message || 'Internal server error';
+    const message =
+      exception instanceof HttpException
+        ? exception.message || 'An error occurred'
+        : 'Internal server error';
 
-    // Handle Prisma-specific errors
-    if (exception.code === 'P2002') {
-      message = 'Unique constraint violation.';
-    } else if (exception.code === 'P2025') {
-      message = 'Record not found.';
+    const isFallback = !(exception instanceof HttpException);
+
+    if (isFallback) {
+      this.logger.error(
+        `HTTP ${status} - ${message}`,
+        exception.stack,
+        `${request.method} ${request.url}`,
+      );
+    } else {
+      this.logger.error(
+        `HTTP ${status} - ${message}`,
+        undefined,
+        `${request.method} ${request.url}`,
+      );
     }
 
     response.status(status).json({

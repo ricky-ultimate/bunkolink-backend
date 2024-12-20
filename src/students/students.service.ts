@@ -10,23 +10,25 @@ import { PrismaService } from '../prisma/prisma.service';
 export class StudentsService {
   constructor(private prisma: PrismaService) {}
 
-  async createStudent(data: {
-    name: string;
-    matricNumber: string;
-    level: string;
-    department: string;
-  }) {
+  async createStudent(
+    name: string,
+    matricNumber: string,
+    level: string,
+    department: string,
+  ) {
     try {
       return await this.prisma.student.create({
-        data,
+        data: { name, matricNumber, level, department },
       });
     } catch (error) {
       if (error.code === 'P2002') {
         throw new ConflictException(
-          'A student with this matric number already exists.',
+          `Duplicate student creation attempted: Matric Number ${matricNumber}`,
         );
       }
-      throw new BadRequestException('Error creating the student.');
+      throw new BadRequestException(
+        `Failed to create student with Matric Number ${matricNumber}`,
+      );
     }
   }
 
@@ -39,7 +41,9 @@ export class StudentsService {
       where: { id },
     });
     if (!student) {
-      throw new NotFoundException(`Student with ID ${id} not found.`);
+      throw new NotFoundException(
+        `Unable to fetch. Student with ID ${id} not found.`,
+      );
     }
     return student;
   }
@@ -64,7 +68,7 @@ export class StudentsService {
           `Unable to update. Student with ID ${id} not found.`,
         );
       }
-      throw new BadRequestException('Error updating the student.');
+      throw new BadRequestException(`Failed to update student with ID ${id}`);
     }
   }
 
@@ -79,7 +83,7 @@ export class StudentsService {
           `Unable to delete. Student with ID ${id} not found.`,
         );
       }
-      throw new BadRequestException('Error deleting the student.');
+      throw new BadRequestException(`Failed to delete student with ID ${id}`);
     }
   }
 }

@@ -23,9 +23,11 @@ export class BooksService {
     } catch (error) {
       if (error.code === 'P2002') {
         // Prisma unique constraint violation
-        throw new ConflictException('A book with this ISBN already exists.');
+        throw new ConflictException(
+          `Duplicate book creation attempted: ISBN ${ISBN}`,
+        );
       }
-      throw new BadRequestException('Error creating the book.');
+      throw new BadRequestException(`Failed to create book with ISBN ${ISBN}`);
     }
   }
 
@@ -36,7 +38,9 @@ export class BooksService {
   async getBookById(id: number) {
     const book = await this.prisma.book.findUnique({ where: { id } });
     if (!book) {
-      throw new NotFoundException(`Book with ID ${id} not found.`);
+      throw new NotFoundException(
+        `Unable to fetch. Book with ID ${id} not found.`,
+      );
     }
     return book;
   }
@@ -62,7 +66,7 @@ export class BooksService {
           `Unable to update. Book with ID ${id} not found.`,
         );
       }
-      throw new BadRequestException('Error updating the book.');
+      throw new BadRequestException(`Failed to update book with ID ${id}`);
     }
   }
 
@@ -75,7 +79,7 @@ export class BooksService {
           `Unable to delete. Book with ID ${id} not found.`,
         );
       }
-      throw new BadRequestException('Error deleting the book.');
+      throw new BadRequestException(`Failed to delete book with ID ${id}`);
     }
   }
 }
