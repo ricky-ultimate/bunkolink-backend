@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
@@ -26,8 +27,18 @@ export class StudentsController {
   }
 
   @Get()
-  async getAllStudents() {
-    return this.studentsService.getAllStudents();
+  async getAllStudents(
+    @Query('name') name?: string,
+    @Query('matricNumber') matricNumber?: string,
+    @Query('level') level?: string,
+    @Query('department') department?: string,
+  ) {
+    return this.studentsService.getAllStudents({
+      name,
+      matricNumber,
+      level,
+      department,
+    });
   }
 
   @Get(':id')
