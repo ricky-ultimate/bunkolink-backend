@@ -43,14 +43,30 @@ export class StudentsService {
     }
   }
 
-  async getAllStudents() {
-    const students = this.prisma.student.findMany();
+  async getAllStudents(filters?: {
+    name?: string;
+    matricNumber?: string;
+    level?: string;
+    department?: string;
+  }) {
+    const { name, matricNumber, level, department } = filters || {};
+    const students = await this.prisma.student.findMany({
+      where: {
+        ...(name && { name: { contains: name, mode: 'insensitive' } }),
+        ...(matricNumber && { matricNumber }),
+        ...(level && { level }),
+        ...(department && {
+          department: { contains: department, mode: 'insensitive' },
+        }),
+      },
+    });
     await this.auditLogService.logAction(
       'FETCH_ALL',
       'Student',
       0,
       'Fetched all students',
     );
+    return students;
   }
 
   async getStudentById(id: number) {
