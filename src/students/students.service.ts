@@ -113,7 +113,7 @@ export class StudentsService {
         id,
         `Student with ID: ${id} deleted`,
       );
-      return this.deleteStudent;
+      return deletedStudent;
     } catch (error) {
       if (error.code === 'P2025') {
         throw new NotFoundException(
