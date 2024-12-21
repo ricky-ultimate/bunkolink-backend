@@ -104,12 +104,25 @@ export class BorrowedBooksService {
     }
   }
 
-  async getAllBorrowedBooks() {
+  async getAllBorrowedBooks(filters?: {
+    borrowDate?: string;
+    studentName?: string;
+    studentMatricNo?: string;
+  }) {
+    const { borrowDate, studentName, studentMatricNo } = filters || {};
     const borrowedBooks = await this.prisma.borrowedBook.findMany({
-      include: {
-        book: true,
-        student: true,
+      where: {
+        ...(borrowDate && { borrowDate: { equals: new Date(borrowDate) } }),
+        ...(studentName && {
+          student: { name: { contains: studentName, mode: 'insensitive' } },
+        }),
+        ...(studentMatricNo && {
+          student: {
+            matricNumber: { contains: studentMatricNo, mode: 'insensitive' },
+          },
+        }),
       },
+      include: { book: true, student: true },
     });
 
     await this.auditLogService.logAction(

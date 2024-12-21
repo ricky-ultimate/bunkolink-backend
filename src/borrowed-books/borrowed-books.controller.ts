@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Get } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Query } from '@nestjs/common';
 import { BorrowedBooksService } from './borrowed-books.service';
 import { BorrowBookDto } from './dto/borrow-book.dto';
 
@@ -20,7 +20,15 @@ export class BorrowedBooksController {
   }
 
   @Get()
-  async getAllBorrowedBooks() {
-    return this.borrowedBooksService.getAllBorrowedBooks();
+  async getAllBorrowedBooks(
+    @Query('borrowDate') borrowDate?: string,
+    @Query('studentName') studentName?: string,
+    @Query('studentMatricNo') studentMatricNo?: string,
+  ) {
+    return this.borrowedBooksService.getAllBorrowedBooks({
+      borrowDate,
+      studentName,
+      studentMatricNo,
+    });
   }
 }

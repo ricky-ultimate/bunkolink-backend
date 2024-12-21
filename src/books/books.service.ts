@@ -42,8 +42,19 @@ export class BooksService {
     }
   }
 
-  async getAllBooks() {
-    const books = await this.prisma.book.findMany();
+  async getAllBooks(filters?: {
+    title?: string;
+    author?: string;
+    ISBN?: string;
+  }) {
+    const { title, author, ISBN } = filters || {};
+    const books = await this.prisma.book.findMany({
+      where: {
+        ...(title && { title: { contains: title, mode: 'insensitive' } }),
+        ...(author && { author: { contains: author, mode: 'insensitive' } }),
+        ...(ISBN && { ISBN }),
+      },
+    });
     await this.auditLogService.logAction(
       'FETCH_ALL',
       'Book',
