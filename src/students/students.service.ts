@@ -5,10 +5,14 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditLogService } from '../common/services/audit-log.service';
 
 @Injectable()
 export class StudentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private auditLogService: AuditLogService,
+  ) {}
 
   async createStudent(
     name: string,
@@ -17,9 +21,16 @@ export class StudentsService {
     department: string,
   ) {
     try {
-      return await this.prisma.student.create({
+      const student = await this.prisma.student.create({
         data: { name, matricNumber, level, department },
       });
+      await this.auditLogService.logAction(
+        'CREATE',
+        'Student',
+        student.id,
+        `Student created with matric number: ${matricNumber}`,
+      );
+      return student;
     } catch (error) {
       if (error.code === 'P2002') {
         throw new ConflictException(
@@ -33,7 +44,13 @@ export class StudentsService {
   }
 
   async getAllStudents() {
-    return this.prisma.student.findMany();
+    const students = this.prisma.student.findMany();
+    await this.auditLogService.logAction(
+      'FETCH_ALL',
+      'Student',
+      0,
+      'Fetched all students',
+    );
   }
 
   async getStudentById(id: number) {
@@ -45,6 +62,12 @@ export class StudentsService {
         `Unable to fetch. Student with ID ${id} not found.`,
       );
     }
+    await this.auditLogService.logAction(
+      'FETCH',
+      'Student',
+      id,
+      `Fetched student with ID: ${id}`,
+    );
     return student;
   }
 
@@ -58,10 +81,17 @@ export class StudentsService {
     }>,
   ) {
     try {
-      return await this.prisma.student.update({
+      const updatedStudent = await this.prisma.student.update({
         where: { id },
         data,
       });
+      await this.auditLogService.logAction(
+        'UPDATE',
+        'Student',
+        id,
+        `Student with ID: ${id} updated`,
+      );
+      return updatedStudent;
     } catch (error) {
       if (error.code === 'P2025') {
         throw new NotFoundException(
@@ -74,9 +104,16 @@ export class StudentsService {
 
   async deleteStudent(id: number) {
     try {
-      return await this.prisma.student.delete({
+      const deletedStudent = await this.prisma.student.delete({
         where: { id },
       });
+      await this.auditLogService.logAction(
+        'DELETE',
+        'Student',
+        id,
+        `Student with ID: ${id} deleted`,
+      );
+      return this.deleteStudent;
     } catch (error) {
       if (error.code === 'P2025') {
         throw new NotFoundException(

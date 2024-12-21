@@ -5,10 +5,14 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditLogService } from '../common/services/audit-log.service';
 
 @Injectable()
 export class BooksService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private auditLogService: AuditLogService,
+  ) {}
 
   async createBook(
     title: string,
@@ -17,9 +21,16 @@ export class BooksService {
     availableCopies: number,
   ) {
     try {
-      return await this.prisma.book.create({
+      const book = await this.prisma.book.create({
         data: { title, author, ISBN, availableCopies },
       });
+      await this.auditLogService.logAction(
+        'CREATE',
+        'Book',
+        book.id,
+        `Book created with title: ${title}, ISBN: ${ISBN}`,
+      );
+      return book;
     } catch (error) {
       if (error.code === 'P2002') {
         // Prisma unique constraint violation
@@ -32,7 +43,14 @@ export class BooksService {
   }
 
   async getAllBooks() {
-    return this.prisma.book.findMany();
+    const books = await this.prisma.book.findMany();
+    await this.auditLogService.logAction(
+      'FETCH_ALL',
+      'Book',
+      0,
+      'Fetched all books',
+    );
+    return books;
   }
 
   async getBookById(id: number) {
@@ -42,6 +60,12 @@ export class BooksService {
         `Unable to fetch. Book with ID ${id} not found.`,
       );
     }
+    await this.auditLogService.logAction(
+      'FETCH',
+      'Book',
+      id,
+      `Fetched book with ID: ${id}`,
+    );
     return book;
   }
 
@@ -55,13 +79,19 @@ export class BooksService {
     }>,
   ) {
     try {
-      return await this.prisma.book.update({
+      const updatedBook = await this.prisma.book.update({
         where: { id },
         data,
       });
+      await this.auditLogService.logAction(
+        'UPDATE',
+        'Book',
+        id,
+        `Book with ID: ${id} updated`,
+      );
+      return updatedBook;
     } catch (error) {
       if (error.code === 'P2025') {
-        // Prisma "Record to update not found"
         throw new NotFoundException(
           `Unable to update. Book with ID ${id} not found.`,
         );
@@ -72,7 +102,14 @@ export class BooksService {
 
   async deleteBook(id: number) {
     try {
-      return await this.prisma.book.delete({ where: { id } });
+      const deletedBook = await this.prisma.book.delete({ where: { id } });
+      await this.auditLogService.logAction(
+        'DELETE',
+        'Book',
+        id,
+        `Book with ID: ${id} deleted`,
+      );
+      return deletedBook;
     } catch (error) {
       if (error.code === 'P2025') {
         throw new NotFoundException(

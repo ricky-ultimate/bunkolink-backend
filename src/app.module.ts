@@ -7,10 +7,11 @@ import { BorrowedBooksModule } from './borrowed-books/borrowed-books.module';
 import { HealthController } from './health/health.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { AppLoggerService } from './common/services/logger.service';
+import { AuditLogService } from './common/services/audit-log.service';
 
 @Module({
   imports: [BooksModule, StudentsModule, BorrowedBooksModule, PrismaModule],
   controllers: [AppController, HealthController],
-  providers: [AppService, AppLoggerService],
+  providers: [AppService, AppLoggerService, AuditLogService],
 })
 export class AppModule {}
