@@ -38,17 +38,23 @@ describe('BorrowedBooksService', () => {
 
     // Mock book and student queries
     jest.spyOn(prisma.book, 'findUnique').mockResolvedValueOnce(book as any);
-    jest.spyOn(prisma.student, 'findUnique').mockResolvedValueOnce(student as any);
+    jest
+      .spyOn(prisma.student, 'findUnique')
+      .mockResolvedValueOnce(student as any);
 
     // Mock $transaction for borrowing book
     jest.spyOn(prisma, '$transaction').mockResolvedValueOnce([{}, {}]);
 
-    const auditLogSpy = jest.spyOn(auditLogService, 'logAction').mockResolvedValue(undefined);
+    const auditLogSpy = jest
+      .spyOn(auditLogService, 'logAction')
+      .mockResolvedValue(undefined);
 
     await service.borrowBook(1, 1);
 
     expect(prisma.book.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
-    expect(prisma.student.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
+    expect(prisma.student.findUnique).toHaveBeenCalledWith({
+      where: { id: 1 },
+    });
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     expect(auditLogSpy).toHaveBeenCalledWith(
       'BORROW',
@@ -74,7 +80,9 @@ describe('BorrowedBooksService', () => {
     } as any);
 
     await expect(service.borrowBook(1, 1)).rejects.toThrow(
-      new BadRequestException('Unable to borrow. Book with ID: 1 has no available copies'),
+      new BadRequestException(
+        'Unable to borrow. Book with ID: 1 has no available copies',
+      ),
     );
   });
 
@@ -84,7 +92,9 @@ describe('BorrowedBooksService', () => {
     jest.spyOn(prisma.student, 'findUnique').mockResolvedValueOnce(null);
 
     await expect(service.borrowBook(1, 1)).rejects.toThrow(
-      new NotFoundException('Unable to borrow book with ID: 1. Student with ID 1 not found.'),
+      new NotFoundException(
+        'Unable to borrow book with ID: 1. Student with ID 1 not found.',
+      ),
     );
   });
 
@@ -98,16 +108,23 @@ describe('BorrowedBooksService', () => {
       book: book,
     };
 
-    jest.spyOn(prisma.borrowedBook, 'findUnique').mockResolvedValueOnce(borrowedBook as any);
+    jest
+      .spyOn(prisma.borrowedBook, 'findUnique')
+      .mockResolvedValueOnce(borrowedBook as any);
 
     // Mock $transaction for returning book
     jest.spyOn(prisma, '$transaction').mockResolvedValueOnce([{}, {}]);
 
-    const auditLogSpy = jest.spyOn(auditLogService, 'logAction').mockResolvedValue(undefined);
+    const auditLogSpy = jest
+      .spyOn(auditLogService, 'logAction')
+      .mockResolvedValue(undefined);
 
     await service.returnBook(1);
 
-    expect(prisma.borrowedBook.findUnique).toHaveBeenCalledWith({ where: { id: 1 }, include: { book: true } });
+    expect(prisma.borrowedBook.findUnique).toHaveBeenCalledWith({
+      where: { id: 1 },
+      include: { book: true },
+    });
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     expect(auditLogSpy).toHaveBeenCalledWith(
       'RETURN',
@@ -142,9 +159,13 @@ describe('BorrowedBooksService', () => {
       { id: 2, bookId: 2, studentId: 2, returnDate: null },
     ];
 
-    jest.spyOn(prisma.borrowedBook, 'findMany').mockResolvedValueOnce(borrowedBooks as any);
+    jest
+      .spyOn(prisma.borrowedBook, 'findMany')
+      .mockResolvedValueOnce(borrowedBooks as any);
 
-    const auditLogSpy = jest.spyOn(auditLogService, 'logAction').mockResolvedValue(undefined);
+    const auditLogSpy = jest
+      .spyOn(auditLogService, 'logAction')
+      .mockResolvedValue(undefined);
 
     const result = await service.getAllBorrowedBooks();
 
