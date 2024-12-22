@@ -13,7 +13,7 @@ import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Borrowed Books')
+@ApiTags('Students')
 @Controller('v1/students')
 export class StudentsController {
   constructor(private studentsService: StudentsService) {}
