@@ -1,7 +1,9 @@
 import { Controller, Post, Body, Param, Get, Query } from '@nestjs/common';
 import { BorrowedBooksService } from './borrowed-books.service';
 import { BorrowBookDto } from './dto/borrow-book.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Borrowed Books')
 @Controller('v1/borrowed-books')
 export class BorrowedBooksController {
   constructor(private borrowedBooksService: BorrowedBooksService) {}
