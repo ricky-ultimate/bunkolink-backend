@@ -11,7 +11,9 @@ import {
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Borrowed Books')
 @Controller('v1/students')
 export class StudentsController {
   constructor(private studentsService: StudentsService) {}
