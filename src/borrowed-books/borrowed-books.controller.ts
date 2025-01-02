@@ -2,8 +2,8 @@ import { Controller, Post, Body, Param, Get, Query, UseGuards } from '@nestjs/co
 import { BorrowedBooksService } from './borrowed-books.service';
 import { BorrowBookDto } from './dto/borrow-book.dto';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @ApiTags('Borrowed Books')
 @ApiBearerAuth()
