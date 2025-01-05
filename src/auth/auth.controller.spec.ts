@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { BadRequestException } from '@nestjs/common';
 import { Role } from '@prisma/client';
 
@@ -11,7 +12,7 @@ describe('AuthController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [AuthService],
+      providers: [AuthService, PrismaService],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
@@ -25,7 +26,7 @@ describe('AuthController', () => {
   it('should call login method in AuthService', async () => {
     const loginSpy = jest.spyOn(service, 'login').mockResolvedValueOnce({
       accessToken: 'valid_jwt_token',
-      user: { id: 1, email: 'test@example.com', role: Role.USER },
+      user: { id: 1, email: 'test@example.com', password: 'password', role: Role.USER, studentId: 3 },
     });
 
     const response = await controller.login({
@@ -43,6 +44,7 @@ describe('AuthController', () => {
       email: 'new@example.com',
       password: 'hashedPassword',
       role: Role.USER,
+      studentId: 3
     });
 
     const response = await controller.register({
@@ -66,6 +68,6 @@ describe('AuthController', () => {
         password: 'password',
         role: 'INVALID_ROLE',
       }),
-    ).rejects.toThrowError(BadRequestException);
+    ).rejects.toThrow(BadRequestException);
   });
 });

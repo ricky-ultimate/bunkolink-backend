@@ -40,6 +40,7 @@ describe('StudentsService', () => {
         matricNumber: 'MT20231001',
         level: '300',
         department: 'Computer Science',
+        userId: 2
       });
 
     const auditLogSpy = jest
@@ -51,6 +52,7 @@ describe('StudentsService', () => {
       'MT20231001',
       '300',
       'Computer Science',
+      2,
     );
 
     expect(createStudentSpy).toHaveBeenCalledTimes(1);
@@ -60,6 +62,7 @@ describe('StudentsService', () => {
         matricNumber: 'MT20231001',
         level: '300',
         department: 'Computer Science',
+        userId: 2,
       },
     });
 
@@ -70,6 +73,7 @@ describe('StudentsService', () => {
       'Student created with matric number: MT20231001',
     );
     expect(result.name).toEqual('John Doe');
+    expect(result.userId).toEqual(2);
   });
 
   it('should update a student', async () => {
@@ -81,6 +85,7 @@ describe('StudentsService', () => {
         matricNumber: 'MT20231001',
         level: '400',
         department: 'Computer Science',
+        userId: 2
       });
 
     const auditLogSpy = jest
@@ -115,6 +120,7 @@ describe('StudentsService', () => {
         matricNumber: 'MT20231001',
         level: '300',
         department: 'Computer Science',
+        userId: 2,
       });
 
     const auditLogSpy = jest
@@ -147,6 +153,7 @@ describe('StudentsService', () => {
         matricNumber: 'MT20231001',
         level: '300',
         department: 'Computer Science',
+        userId: 2
       });
 
     const auditLogSpy = jest
