@@ -29,6 +29,9 @@ model Student {
     level         String
     department    String
     borrowedBooks BorrowedBook[]
+    user          User?          @relation(fields: [userId], references: [id])
+
+    userId Int? @unique
 }
 
 model BorrowedBook {
@@ -49,4 +52,22 @@ model AuditLog {
     entityId   Int
     message    String
     timestamp  DateTime @default(now())
+}
+
+model User {
+    id       Int      @id @default(autoincrement())
+    email    String   @unique
+    password String
+    role     Role     @default(USER)
+    student  Student?
+
+    studentId Int? @unique
+
+    @@map("users")
+}
+
+enum Role {
+    ADMIN
+    USER
+    STUDENT_LIBRARIAN
 }

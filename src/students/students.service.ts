@@ -19,10 +19,11 @@ export class StudentsService {
     matricNumber: string,
     level: string,
     department: string,
+    userId?:number,
   ) {
     try {
       const student = await this.prisma.student.create({
-        data: { name, matricNumber, level, department },
+        data: { name, matricNumber, level, department, userId },
       });
       await this.auditLogService.logAction(
         'CREATE',
@@ -94,6 +95,7 @@ export class StudentsService {
       matricNumber: string;
       level: string;
       department: string;
+      userId: number;
     }>,
   ) {
     try {

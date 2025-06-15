@@ -8,9 +8,10 @@ import { HealthController } from './health/health.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { AppLoggerService } from './common/services/logger.service';
 import { AuditLogService } from './common/services/audit-log.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [BooksModule, StudentsModule, BorrowedBooksModule, PrismaModule],
+  imports: [BooksModule, StudentsModule, BorrowedBooksModule, PrismaModule, AuthModule],
   controllers: [AppController, HealthController],
   providers: [AppService, AppLoggerService, AuditLogService],
 })

@@ -30,6 +30,7 @@ async function bootstrap() {
     .addTag('Students')
     .addTag('Borrowed Books')
     .addTag('Health')
+    .addTag('Authentication')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
