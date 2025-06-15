@@ -1,133 +1,75 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { Book } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../common/services/audit-log.service';
+import { BaseService } from '../common/services/base.service';
+import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
+import { BookFilter } from '../common/interfaces/filter.interface';
 
 @Injectable()
-export class BooksService {
+export class BooksService extends BaseService<
+  Book,
+  CreateBookDto,
+  UpdateBookDto
+> {
+  protected entityName = 'Book';
+  protected prismaDelegate = this.prisma.book;
+
   constructor(
-    private prisma: PrismaService,
-    private auditLogService: AuditLogService,
-  ) {}
-
-  async createBook(
-    title: string,
-    author: string,
-    ISBN: string,
-    availableCopies: number,
+    protected readonly prisma: PrismaService,
+    protected readonly auditLogService: AuditLogService,
   ) {
-    try {
-      const book = await this.prisma.book.create({
-        data: { title, author, ISBN, availableCopies },
-      });
-      await this.auditLogService.logAction(
-        'CREATE',
-        'Book',
-        book.id,
-        `Book created with title: ${title}, ISBN: ${ISBN}`,
-      );
-      return book;
-    } catch (error) {
-      if (error.code === 'P2002') {
-        // Prisma unique constraint violation
-        throw new ConflictException(
-          `Duplicate book creation attempted: ISBN ${ISBN}`,
-        );
-      }
-      throw new BadRequestException(`Failed to create book with ISBN ${ISBN}`);
-    }
+    super(prisma, auditLogService);
   }
 
-  async getAllBooks(filters?: {
-    title?: string;
-    author?: string;
-    ISBN?: string;
-  }) {
-    const { title, author, ISBN } = filters || {};
-    const books = await this.prisma.book.findMany({
-      where: {
-        ...(title && { title: { contains: title, mode: 'insensitive' } }),
-        ...(author && { author: { contains: author, mode: 'insensitive' } }),
-        ...(ISBN && { ISBN }),
-      },
-    });
-    await this.auditLogService.logAction(
-      'FETCH_ALL',
-      'Book',
-      0,
-      'Fetched all books',
+  async findAvailableBooks(filters: BookFilter = {}) {
+    const enhancedFilters = {
+      ...filters,
+      availableCopies: { gt: 0 },
+    };
+
+    return this.findAll(enhancedFilters);
+  }
+
+  async updateStock(
+    bookId: number,
+    increment: number,
+    userId?: number,
+  ): Promise<Book> {
+    const book = await this.findById(bookId);
+
+    const newStock = book.availableCopies + increment;
+    if (newStock < 0) {
+      throw new BadRequestException('Insufficient stock available');
+    }
+
+    return this.update(
+      bookId,
+      { availableCopies: newStock } as Partial<UpdateBookDto>,
+      userId,
     );
-    return books;
   }
 
-  async getBookById(id: number) {
-    const book = await this.prisma.book.findUnique({ where: { id } });
-    if (!book) {
-      throw new NotFoundException(
-        `Unable to fetch. Book with ID ${id} not found.`,
-      );
-    }
-    await this.auditLogService.logAction(
-      'FETCH',
-      'Book',
-      id,
-      `Fetched book with ID: ${id}`,
-    );
-    return book;
-  }
+  protected buildWhereClause(filters: BookFilter): Record<string, any> {
+    const where: Record<string, any> = {};
 
-  async updateBook(
-    id: number,
-    data: Partial<{
-      title: string;
-      author: string;
-      ISBN: string;
-      availableCopies: number;
-    }>,
-  ) {
-    try {
-      const updatedBook = await this.prisma.book.update({
-        where: { id },
-        data,
-      });
-      await this.auditLogService.logAction(
-        'UPDATE',
-        'Book',
-        id,
-        `Book with ID: ${id} updated`,
-      );
-      return updatedBook;
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(
-          `Unable to update. Book with ID ${id} not found.`,
-        );
-      }
-      throw new BadRequestException(`Failed to update book with ID ${id}`);
+    if (filters.title) {
+      where.title = { contains: filters.title, mode: 'insensitive' };
     }
-  }
 
-  async deleteBook(id: number) {
-    try {
-      const deletedBook = await this.prisma.book.delete({ where: { id } });
-      await this.auditLogService.logAction(
-        'DELETE',
-        'Book',
-        id,
-        `Book with ID: ${id} deleted`,
-      );
-      return deletedBook;
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(
-          `Unable to delete. Book with ID ${id} not found.`,
-        );
-      }
-      throw new BadRequestException(`Failed to delete book with ID ${id}`);
+    if (filters.author) {
+      where.author = { contains: filters.author, mode: 'insensitive' };
     }
+
+    if (filters.ISBN) {
+      where.ISBN = filters.ISBN;
+    }
+
+    if (filters.isAvailable !== undefined) {
+      where.availableCopies = filters.isAvailable ? { gt: 0 } : { equals: 0 };
+    }
+
+    return where;
   }
 }
