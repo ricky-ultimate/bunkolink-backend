@@ -8,78 +8,89 @@ import {
   Delete,
   Query,
   UseGuards,
+  ParseIntPipe,
+  Request,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCreateBook,
+  ApiGetBooks,
+  ApiGetBookById,
+  ApiUpdateBook,
+  ApiDeleteBook,
+} from './decorators/books.decorator';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { BookFilter } from '../common/interfaces/filter.interface';
+import { PaginationOptions } from '../common/interfaces/base.interface';
 
 @ApiTags('Books')
 @ApiBearerAuth()
-@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('v1/books')
 export class BooksController {
-  constructor(private booksService: BooksService) {}
+  constructor(private readonly booksService: BooksService) {}
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN')
-  @ApiOperation({ summary: 'Create a new book', description: 'Adds a new book to the database.' })
-  @ApiResponse({ status: 201, description: 'The book has been successfully created.' })
-  @ApiResponse({ status: 400, description: 'Invalid input.' })
+  @ApiCreateBook()
   @Post()
-  async createBook(@Body() createBookDto: CreateBookDto) {
-    return this.booksService.createBook(
-      createBookDto.title,
-      createBookDto.author,
-      createBookDto.ISBN,
-      createBookDto.availableCopies,
-    );
+  async createBook(@Body() createBookDto: CreateBookDto, @Request() req: any) {
+    return this.booksService.create(createBookDto, req.user.userId);
   }
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN', 'USER')
-  @ApiOperation({ summary: 'Get all books', description: 'Fetches a list of all books in the library.' })
-  @ApiQuery({ name: 'title', required: false, description: 'Filter books by title' })
-  @ApiQuery({ name: 'author', required: false, description: 'Filter books by author' })
-  @ApiQuery({ name: 'ISBN', required: false, description: 'Filter books by ISBN' })
-  @ApiResponse({ status: 200, description: 'List of books.' })
+  @ApiGetBooks()
   @Get()
   async getAllBooks(
     @Query('title') title?: string,
     @Query('author') author?: string,
     @Query('ISBN') ISBN?: string,
+    @Query('isAvailable') isAvailable?: boolean,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
-    return this.booksService.getAllBooks({ title, author, ISBN });
+    const filters: BookFilter = { title, author, ISBN, isAvailable };
+    const pagination: PaginationOptions = page ? { page, limit } : undefined;
+
+    return this.booksService.findAll(filters, pagination);
   }
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN', 'USER')
-  @ApiOperation({ summary: 'Get a book by ID', description: 'Fetches a single book by its ID.' })
-  @ApiResponse({ status: 200, description: 'Book details.' })
-  @ApiResponse({ status: 404, description: 'Book not found.' })
+  @ApiOperation({ summary: 'Get available books only' })
+  @Get('available')
+  async getAvailableBooks(@Query() filters: BookFilter) {
+    return this.booksService.findAvailableBooks(filters);
+  }
+
+  @Roles('ADMIN', 'STUDENT_LIBRARIAN', 'USER')
+  @ApiGetBookById()
   @Get(':id')
-  async getBookById(@Param('id') id: string) {
-    return this.booksService.getBookById(+id);
+  async getBookById(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+  ) {
+    return this.booksService.findById(id, req.user.userId);
   }
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN')
-  @ApiOperation({ summary: 'Update a book', description: 'Updates the details of an existing book.' })
-  @ApiResponse({ status: 200, description: 'The book has been successfully updated.' })
-  @ApiResponse({ status: 404, description: 'Book not found.' })
-  @ApiResponse({ status: 400, description: 'Invalid input data.' })
+  @ApiUpdateBook()
   @Patch(':id')
   async updateBook(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateBookDto: UpdateBookDto,
+    @Request() req: any,
   ) {
-    return this.booksService.updateBook(+id, updateBookDto);
+    return this.booksService.update(id, updateBookDto, req.user.userId);
   }
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN')
-  @ApiOperation({ summary: 'Delete a book', description: 'Deletes a book by its ID.' })
-  @ApiResponse({ status: 200, description: 'The book has been successfully deleted.' })
-  @ApiResponse({ status: 404, description: 'Book not found.' })
+  @ApiDeleteBook()
   @Delete(':id')
-  async deleteBook(@Param('id') id: string) {
-    return this.booksService.deleteBook(+id);
+  async deleteBook(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
+    return this.booksService.delete(id, req.user.userId);
   }
 }
