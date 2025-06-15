@@ -8,13 +8,23 @@ import {
   Delete,
   Query,
   UseGuards,
+  ParseIntPipe,
+  Request,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import {
+  ApiCreateStudent,
+  ApiGetStudents,
+  ApiGetStudentById,
+  ApiUpdateStudent,
+} from './decorators/students.decorator';
+import { StudentFilter } from '../common/interfaces/filter.interface';
+import { PaginationOptions } from '../common/interfaces/base.interface';
 
 @ApiTags('Students')
 @ApiBearerAuth()
@@ -24,69 +34,56 @@ export class StudentsController {
   constructor(private studentsService: StudentsService) {}
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN')
-  @ApiOperation({ summary: 'Create a new student', description: 'Adds a new student to the database.' })
-  @ApiResponse({ status: 201, description: 'The student has been successfully created.' })
-  @ApiResponse({ status: 400, description: 'Invalid input data.' })
+  @ApiCreateStudent()
   @Post()
   async createStudent(@Body() createStudentDto: CreateStudentDto) {
-    return this.studentsService.createStudent(
-      createStudentDto.name,
-      createStudentDto.matricNumber,
-      createStudentDto.level,
-      createStudentDto.department,
-    );
+    return this.studentsService.create(createStudentDto);
   }
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN', 'USER')
-  @ApiOperation({ summary: 'Get all students', description: 'Fetches a list of all students in the system.' })
-  @ApiQuery({ name: 'name', required: false, description: 'Filter students by name' })
-  @ApiQuery({ name: 'matricNumber', required: false, description: 'Filter students by matriculation number' })
-  @ApiQuery({ name: 'level', required: false, description: 'Filter students by level' })
-  @ApiQuery({ name: 'department', required: false, description: 'Filter students by department' })
-  @ApiResponse({ status: 200, description: 'List of students.' })
+  @ApiGetStudents()
   @Get()
   async getAllStudents(
     @Query('name') name?: string,
     @Query('matricNumber') matricNumber?: string,
     @Query('level') level?: string,
     @Query('department') department?: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
-    return this.studentsService.getAllStudents({
-      name,
-      matricNumber,
-      level,
-      department,
-    });
+    const filters: StudentFilter = { name, matricNumber, level, department };
+    const pagination: PaginationOptions = page ? { page, limit } : undefined;
+
+    return this.studentsService.findAll(filters, pagination);
   }
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN', 'USER')
-  @ApiOperation({ summary: 'Get a student by ID', description: 'Fetches a single student by their ID.' })
-  @ApiResponse({ status: 200, description: 'Student details.' })
-  @ApiResponse({ status: 404, description: 'Student not found.' })
+  @ApiGetStudentById()
   @Get(':id')
-  async getStudentById(@Param('id') id: string) {
-    return this.studentsService.getStudentById(+id);
+  async getStudentById(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+  ) {
+    return this.studentsService.findById(id, req.user.userId);
   }
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN')
-  @ApiOperation({ summary: 'Update a student', description: 'Updates the details of an existing student.' })
-  @ApiResponse({ status: 200, description: 'The student has been successfully updated.' })
-  @ApiResponse({ status: 404, description: 'Student not found.' })
-  @ApiResponse({ status: 400, description: 'Invalid input data.' })
+  @ApiUpdateStudent()
   @Patch(':id')
   async updateStudent(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateStudentDto: UpdateStudentDto,
+    @Request() req: any,
   ) {
-    return this.studentsService.updateStudent(+id, updateStudentDto);
+    return this.studentsService.update(id, updateStudentDto, req.user.userId);
   }
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN')
-  @ApiOperation({ summary: 'Delete a student', description: 'Deletes a student by their ID.' })
-  @ApiResponse({ status: 200, description: 'The student has been successfully deleted.' })
-  @ApiResponse({ status: 404, description: 'Student not found.' })
   @Delete(':id')
-  async deleteStudent(@Param('id') id: string) {
-    return this.studentsService.deleteStudent(+id);
+  async deleteStudent(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+  ) {
+    return this.studentsService.delete(id, req.user.userId);
   }
 }
