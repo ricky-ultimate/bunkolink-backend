@@ -19,7 +19,11 @@ model Book {
     author          String
     ISBN            String         @unique
     availableCopies Int
+    createdAt       DateTime       @default(now())
+    updatedAt       DateTime       @updatedAt
     borrowedBooks   BorrowedBook[]
+
+    @@map("books")
 }
 
 model Student {
@@ -28,10 +32,13 @@ model Student {
     matricNumber  String         @unique
     level         String
     department    String
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
     borrowedBooks BorrowedBook[]
     user          User?          @relation(fields: [userId], references: [id])
+    userId        Int?           @unique
 
-    userId Int? @unique
+    @@map("students")
 }
 
 model BorrowedBook {
@@ -40,9 +47,14 @@ model BorrowedBook {
     studentId  Int
     borrowDate DateTime  @default(now())
     returnDate DateTime?
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
 
-    book    Book    @relation(fields: [bookId], references: [id])
-    student Student @relation(fields: [studentId], references: [id])
+    book    Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+    student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+    @@unique([bookId, studentId, borrowDate])
+    @@map("borrowed_books")
 }
 
 model AuditLog {
@@ -51,17 +63,21 @@ model AuditLog {
     entityType String
     entityId   Int
     message    String
+    userId     Int?
     timestamp  DateTime @default(now())
+
+    @@map("audit_logs")
 }
 
 model User {
-    id       Int      @id @default(autoincrement())
-    email    String   @unique
-    password String
-    role     Role     @default(USER)
-    student  Student?
-
-    studentId Int? @unique
+    id        Int      @id @default(autoincrement())
+    email     String   @unique
+    password  String
+    role      Role     @default(USER)
+    isActive  Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    student   Student?
 
     @@map("users")
 }

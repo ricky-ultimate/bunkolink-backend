@@ -1,9 +1,24 @@
-import { Controller, Post, Body, Param, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Get,
+  Query,
+  UseGuards,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { BorrowedBooksService } from './borrowed-books.service';
 import { BorrowBookDto } from './dto/borrow-book.dto';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import {
+  ApiBorrowBook,
+  ApiReturnBook,
+  ApiGetBorrowedBooks,
+} from './decorators/borrowed-books.decorator';
+import { BorrowedBookFilter } from '../common/interfaces/filter.interface';
 
 @ApiTags('Borrowed Books')
 @ApiBearerAuth()
@@ -13,10 +28,7 @@ export class BorrowedBooksController {
   constructor(private borrowedBooksService: BorrowedBooksService) {}
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN', 'USER')
-  @ApiOperation({ summary: 'Borrow a book', description: 'Records the borrowing of a book by a student.' })
-  @ApiResponse({ status: 201, description: 'The book has been successfully borrowed.' })
-  @ApiResponse({ status: 400, description: 'Invalid input or no copies available.' })
-  @ApiResponse({ status: 404, description: 'Book or student not found.' })
+  @ApiBorrowBook()
   @Post('borrow')
   async borrowBook(@Body() borrowBookDto: BorrowBookDto) {
     return this.borrowedBooksService.borrowBook(
@@ -26,31 +38,30 @@ export class BorrowedBooksController {
   }
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN', 'USER')
-  @ApiOperation({ summary: 'Return a borrowed book', description: 'Records the return of a borrowed book.' })
-  @ApiResponse({ status: 200, description: 'The book has been successfully returned.' })
-  @ApiResponse({ status: 404, description: 'Borrow record not found.' })
-  @ApiResponse({ status: 400, description: 'Book already returned.' })
+  @ApiReturnBook()
   @Post('return/:id')
-  async returnBook(@Param('id') id: string) {
-    return this.borrowedBooksService.returnBook(+id);
+  async returnBook(@Param('id', ParseIntPipe) id: number,) {
+    return this.borrowedBooksService.returnBook(id);
   }
 
   @Roles('ADMIN', 'STUDENT_LIBRARIAN', 'USER')
-  @ApiOperation({ summary: 'Get all borrowed book records', description: 'Fetches all borrowed book records.' })
-  @ApiQuery({ name: 'borrowDate', required: false, description: 'Filter records by borrow date' })
-  @ApiQuery({ name: 'studentName', required: false, description: 'Filter records by student name' })
-  @ApiQuery({ name: 'studentMatricNo', required: false, description: 'Filter records by student matriculation number' })
-  @ApiResponse({ status: 200, description: 'List of borrowed book records.' })
+  @ApiGetBorrowedBooks()
   @Get()
   async getAllBorrowedBooks(
     @Query('borrowDate') borrowDate?: string,
     @Query('studentName') studentName?: string,
     @Query('studentMatricNo') studentMatricNo?: string,
+    @Query('ISBN') ISBN?: string,
+    @Query('author') author?: string,
   ) {
-    return this.borrowedBooksService.getAllBorrowedBooks({
+    const filters: BorrowedBookFilter = {
       borrowDate,
       studentName,
       studentMatricNo,
-    });
+      ISBN,
+      author,
+    };
+
+    return this.borrowedBooksService.findAll(filters)
   }
 }

@@ -1,144 +1,79 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { Student } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../common/services/audit-log.service';
+import { BaseService } from '../common/services/base.service';
+import { CreateStudentDto } from './dto/create-student.dto';
+import { UpdateStudentDto } from './dto/update-student.dto';
+import { StudentFilter } from '../common/interfaces/filter.interface';
 
 @Injectable()
-export class StudentsService {
+export class StudentsService extends BaseService<
+  Student,
+  CreateStudentDto,
+  UpdateStudentDto
+> {
+  protected entityName = 'Student';
+  protected prismaDelegate = this.prisma.student;
+
   constructor(
-    private prisma: PrismaService,
-    private auditLogService: AuditLogService,
-  ) {}
-
-  async createStudent(
-    name: string,
-    matricNumber: string,
-    level: string,
-    department: string,
-    userId?:number,
+    protected readonly prisma: PrismaService,
+    protected readonly auditLogService: AuditLogService,
   ) {
-    try {
-      const student = await this.prisma.student.create({
-        data: { name, matricNumber, level, department, userId },
-      });
-      await this.auditLogService.logAction(
-        'CREATE',
-        'Student',
-        student.id,
-        `Student created with matric number: ${matricNumber}`,
-      );
-      return student;
-    } catch (error) {
-      if (error.code === 'P2002') {
-        throw new ConflictException(
-          `Duplicate student creation attempted: Matric Number ${matricNumber}`,
-        );
-      }
-      throw new BadRequestException(
-        `Failed to create student with Matric Number ${matricNumber}`,
-      );
-    }
+    super(prisma, auditLogService);
   }
 
-  async getAllStudents(filters?: {
-    name?: string;
-    matricNumber?: string;
-    level?: string;
-    department?: string;
-  }) {
-    const { name, matricNumber, level, department } = filters || {};
-    const students = await this.prisma.student.findMany({
-      where: {
-        ...(name && { name: { contains: name, mode: 'insensitive' } }),
-        ...(matricNumber && { matricNumber }),
-        ...(level && { level }),
-        ...(department && {
-          department: { contains: department, mode: 'insensitive' },
-        }),
+  async findByMatricNumber(matricNumber: string): Promise<Student | null> {
+    return this.prisma.student.findUnique({
+      where: { matricNumber },
+      include: this.getIncludeOptions(),
+    });
+  }
+
+  async getStudentBorrowingHistory(studentId: number) {
+    const student = await this.findById(studentId);
+
+    return this.prisma.borrowedBook.findMany({
+      where: { studentId },
+      include: {
+        book: true,
       },
+      orderBy: { borrowDate: 'desc' },
     });
-    await this.auditLogService.logAction(
-      'FETCH_ALL',
-      'Student',
-      0,
-      'Fetched all students',
-    );
-    return students;
   }
 
-  async getStudentById(id: number) {
-    const student = await this.prisma.student.findUnique({
-      where: { id },
-    });
-    if (!student) {
-      throw new NotFoundException(
-        `Unable to fetch. Student with ID ${id} not found.`,
-      );
-    }
-    await this.auditLogService.logAction(
-      'FETCH',
-      'Student',
-      id,
-      `Fetched student with ID: ${id}`,
-    );
-    return student;
+  protected getIncludeOptions() {
+    return {
+      borrowedBooks: {
+        include: {
+          book: true,
+        },
+      },
+    };
   }
 
-  async updateStudent(
-    id: number,
-    data: Partial<{
-      name: string;
-      matricNumber: string;
-      level: string;
-      department: string;
-      userId: number;
-    }>,
-  ) {
-    try {
-      const updatedStudent = await this.prisma.student.update({
-        where: { id },
-        data,
-      });
-      await this.auditLogService.logAction(
-        'UPDATE',
-        'Student',
-        id,
-        `Student with ID: ${id} updated`,
-      );
-      return updatedStudent;
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(
-          `Unable to update. Student with ID ${id} not found.`,
-        );
-      }
-      throw new BadRequestException(`Failed to update student with ID ${id}`);
-    }
-  }
+  protected buildWhereClause(filters: StudentFilter): Record<string, any> {
+    const where: Record<string, any> = {};
 
-  async deleteStudent(id: number) {
-    try {
-      const deletedStudent = await this.prisma.student.delete({
-        where: { id },
-      });
-      await this.auditLogService.logAction(
-        'DELETE',
-        'Student',
-        id,
-        `Student with ID: ${id} deleted`,
-      );
-      return deletedStudent;
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(
-          `Unable to delete. Student with ID ${id} not found.`,
-        );
-      }
-      throw new BadRequestException(`Failed to delete student with ID ${id}`);
+    if (filters.name) {
+      where.name = { contains: filters.name, mode: 'insensitive' };
     }
+
+    if (filters.matricNumber) {
+      where.matricNumber = {
+        contains: filters.matricNumber,
+        mode: 'insensitive',
+      };
+    }
+
+    if (filters.level) {
+      where.level = filters.level;
+    }
+
+    if (filters.department) {
+      where.department = { contains: filters.department, mode: 'insensitive' };
+    }
+
+    return where;
   }
 }

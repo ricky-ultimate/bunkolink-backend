@@ -1,16 +1,15 @@
 import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Role } from '@prisma/client';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiLogin, ApiRegister } from './decorators/auth.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @ApiOperation({ summary: 'User Signup' })
-  @ApiResponse({ status: 201, description: 'User successfully signed up.' })
-  @ApiResponse({ status: 400, description: 'Invalid input.' })
+  @ApiLogin()
   @Post('login')
   async login(
     @Body() { email, password }: { email: string; password: string },
@@ -18,9 +17,7 @@ export class AuthController {
     return this.authService.login(email, password);
   }
 
-  @ApiOperation({ summary: 'User Login' })
-  @ApiResponse({ status: 200, description: 'User successfully logged in.' })
-  @ApiResponse({ status: 401, description: 'Invalid credentials.' })
+  @ApiRegister()
   @Post('register')
   async register(
     @Body()
